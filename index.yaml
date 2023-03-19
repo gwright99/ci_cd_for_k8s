@@ -1,0 +1,26 @@
+apiVersion: v1
+entries:
+  helm-chart-example:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2023-03-19T17:13:36.355979308Z"
+    description: Example Helm Chart
+    digest: 47c56e183a19a12a3ab10e8021f8f3ebc8cdc737ba05e8116a114980d5d35333
+    home: http://github.com/salaboy/helm-chart-example
+    icon: https://salaboy.files.wordpress.com/2019/07/avatar.png
+    keywords:
+    - cloudnative
+    - example
+    - helm
+    - kubernetes
+    - tutorial
+    maintainers:
+    - email: salaboy@gmail.com
+      name: salaboy
+      url: http://salaboy.com
+    name: helm-chart-example
+    type: application
+    urls:
+    - https://github.com/gwright99/ci_cd_for_k8s/releases/download/helm-chart-example-0.1.0/helm-chart-example-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-03-19T17:13:36.355983708Z"
