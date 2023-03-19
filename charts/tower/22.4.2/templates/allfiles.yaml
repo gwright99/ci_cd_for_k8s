@@ -1,0 +1,357 @@
+ kind: ConfigMap
+ apiVersion: v1
+ metadata:
+   name: tower-backend-cfg
+   labels:
+     app: backend-cfg
+ data:
+   TOWER_SERVER_URL:        {{ .Values.config.TOWER_SERVER_URL }}
+   TOWER_CONTACT_EMAIL:     "support@tower.nf"
+   TOWER_JWT_SECRET:        {{ .Values.config.TOWER_JWT_SECRET }}
+   TOWER_CRYPTO_SECRETKEY:  {{ .Values.config.TOWER_CRYPTO_SECRETKEY }}
+   TOWER_LICENSE:           {{ .Values.config.TOWER_LICENSE }}
+   TOWER_ENABLE_PLATFORMS:  "awsbatch-platform,slurm-platform"
+
+   TOWER_DB_URL: {{ .Values.config.TOWER_DB_URL }}
+   TOWER_DB_DRIVER: "org.mariadb.jdbc.Driver"
+   TOWER_DB_USER: "tower"
+   TOWER_DB_PASSWORD: {{ .Values.config.TOWER_DB_PASSWORD }}
+   TOWER_DB_DIALECT: "io.seqera.util.MySQL55DialectCollateBin"
+   TOWER_DB_MIN_POOL_SIZE: "2"
+   TOWER_DB_MAX_POOL_SIZE: "10"
+   TOWER_DB_MAX_LIFETIME: "180000"
+   FLYWAY_LOCATIONS: "classpath:db-schema/mysql"
+
+   TOWER_SMTP_HOST:     {{ .Values.config.TOWER_SMTP_HOST }}
+   TOWER_SMTP_PORT:     {{ .Values.config.TOWER_SMTP_PORT }}
+   TOWER_SMTP_USER:     {{ .Values.config.TOWER_SMTP_USER }}
+   TOWER_SMTP_PASSWORD: {{ .Values.config.TOWER_SMTP_PASSWORD }}
+
+   TOWER_REDIS_URL: {{ .Values.config.TOWER_REDIS_URL }}
+ ---
+ kind: ConfigMap
+ apiVersion: v1
+ metadata:
+   name: tower-yml
+   labels:
+     app: backend-cfg
+ data:
+   tower.yml: |
+     mail:
+       smtp:
+         # FIXME `auth` and `starttls` should be enabled
+         # with a production SMTP host
+         auth: false
+         starttls:
+           enable: false
+           required: false
+# ---
+#  kind: StorageClass
+#  apiVersion: storage.k8s.io/v1
+#  metadata:
+#    name: standard
+#    labels:
+#      app: redis
+#    annotations:
+#      storageclass.beta.kubernetes.io/is-default-class: "true"
+#  provisioner: kubernetes.io/aws-ebs
+#  parameters:
+#    type: gp2
+#    fsType: ext4
+#  allowVolumeExpansion: true
+#  reclaimPolicy: Retain
+ ---
+ apiVersion: v1
+ kind: PersistentVolumeClaim
+ metadata:
+   name: redis-data
+   labels:
+     app: redis
+ spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 10Gi
+   # storageClassName: standard
+   storageClassName: {{ .Values.redis.REDIS_STORAGE_CLASS_NAME }}
+ ---
+ apiVersion: apps/v1
+ kind: StatefulSet
+ metadata:
+   name: redis
+   labels:
+     app: redis
+ spec:
+   selector:
+     matchLabels:
+       app: redis
+   serviceName: redis
+   template:
+     metadata:
+       labels:
+         app: redis
+     spec:
+       initContainers:
+         - name: init-sysctl
+           image: busybox
+           command:
+             - /bin/sh
+             - -c
+             - |
+               sysctl -w net.core.somaxconn=1024;
+               echo never > /sys/kernel/mm/transparent_hugepage/enabled
+           securityContext:
+             privileged: true
+           volumeMounts:
+             - name: host-sys
+               mountPath: /sys
+       containers:
+         - image: cr.seqera.io/public/redis:5.0.8
+           name: redis
+           args:
+             - --appendonly yes
+           ports:
+             - containerPort: 6379
+           volumeMounts:
+             - mountPath: "/data"
+               name: "vol-data"
+       volumes:
+         - name: vol-data
+           persistentVolumeClaim:
+             claimName: redis-data
+         - name: host-sys
+           hostPath:
+             path: /sys
+       restartPolicy: Always
+ ---
+ apiVersion: v1
+ kind: Service
+ metadata:
+   name: redis
+   labels:
+     app: redis
+ spec:
+   ports:
+     - port: 6379
+       targetPort: 6379
+   selector:
+     app: redis
+---
+ apiVersion: apps/v1
+ kind: Deployment
+ metadata:
+   name: cron
+   labels:
+     app: cron
+ spec:
+   selector:
+     matchLabels:
+       app: cron
+   template:
+     metadata:
+       labels:
+         app: cron
+     spec:
+       imagePullSecrets:
+         - name: "cr.seqera.io"
+       volumes:
+         - name: config-volume
+           configMap:
+             name: tower-yml
+       initContainers:
+         - name: migrate-db
+           image: cr.seqera.io/private/nf-tower-enterprise/backend:v22.4.2
+           command: ["sh", "-c", "/migrate-db.sh"]
+           envFrom:
+             - configMapRef:
+                 name: tower-backend-cfg
+           volumeMounts:
+             - name: config-volume
+               mountPath: /tower.yml
+               subPath: tower.yml
+       containers:
+         - name: backend
+           image: cr.seqera.io/private/nf-tower-enterprise/backend:v22.4.2
+           envFrom:
+             - configMapRef:
+                 name: tower-backend-cfg
+           volumeMounts:
+             - name: config-volume
+               mountPath: /tower.yml
+               subPath: tower.yml
+           env:
+             - name: MICRONAUT_ENVIRONMENTS
+               value: "prod,redis,cron"
+           ports:
+             - containerPort: 8080
+           readinessProbe:
+             httpGet:
+               path: /health
+               port: 8080
+             initialDelaySeconds: 5
+             timeoutSeconds: 3
+           livenessProbe:
+             httpGet:
+               path: /health
+               port: 8080
+             initialDelaySeconds: 5
+             timeoutSeconds: 3
+             failureThreshold: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      imagePullSecrets:
+        - name: "cr.seqera.io"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: tower-yml
+      containers:
+        - name: backend
+          image: cr.seqera.io/private/nf-tower-enterprise/backend:v22.4.2
+          envFrom:
+            - configMapRef:
+                name: tower-backend-cfg
+          env:
+            - name: MICRONAUT_ENVIRONMENTS
+              value: "prod,redis,ha"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tower.yml
+              subPath: tower.yml
+          resources:
+            requests:
+              cpu: "1"
+              memory: "1200Mi"
+            limits:
+              memory: "4200Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+        - name: "cr.seqera.io"
+      containers:
+        - name: frontend
+          image: cr.seqera.io/private/nf-tower-enterprise/frontend:v22.4.2
+          ports:
+            - containerPort: 80
+      restartPolicy: Always
+---
+# Services
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  # type: LoadBalancer
+  type: ClusterIP
+  ports:
+    - port: 80
+  selector:
+    app: "frontend"
+---
+ apiVersion: networking.k8s.io/v1
+ kind: Ingress
+ metadata:
+   name: front-ingress
+   annotations:
+     kubernetes.io/ingress.class: alb
+     alb.ingress.kubernetes.io/scheme: internet-facing
+     alb.ingress.kubernetes.io/certificate-arn: YOUR-CERTIFICATE-ARN
+     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
+     alb.ingress.kubernetes.io/load-balancer-attributes: >
+       idle_timeout.timeout_seconds=301,
+       routing.http2.enabled=false,
+       access_logs.s3.enabled=true,
+       access_logs.s3.bucket=YOUR-LOGS-S3-BUCKET,
+       access_logs.s3.prefix=YOUR-LOGS-PREFIX
+ spec:
+   rules:
+     #- host: YOUR-TOWER-HOST-NAME
+     - host: gw.tower-dev.net
+       http:
+         paths:
+           - path: /*
+             backend:
+               serviceName: ssl-redirect
+               servicePort: use-annotation
+           - path: /*
+             backend:
+               serviceName: frontend
+               servicePort: 80

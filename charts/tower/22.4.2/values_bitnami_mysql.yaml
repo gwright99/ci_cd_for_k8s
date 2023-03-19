@@ -1,0 +1,5 @@
+# https://artifacthub.io/packages/helm/bitnami/mysql
+auth:
+  rootPassword: 'tower'
+  # username: 'tower_user'
+  # password: 'tower_user'
