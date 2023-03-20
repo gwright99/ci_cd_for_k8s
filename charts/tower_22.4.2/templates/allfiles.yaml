@@ -332,7 +332,7 @@ metadata:
     alb.ingress.kubernetes.io/group.name: tower-dev
     alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/tags: CreatedBy=CS, VantaOwner=graham.wright@seqera.io, VantaDescription=Nextflow Tower ALB, Environment=development
-    alb.ingress.kubernetes.io/group.order: 344
+    alb.ingress.kubernetes.io/group.order: "344"
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/certificate-arn: {{ $.Values.ingress.CERT_ARN }}
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
