@@ -23,7 +23,7 @@ data:
   TOWER_DB_MAX_LIFETIME: "180000"
   FLYWAY_LOCATIONS: "classpath:db-schema/mysql"
   TOWER_SMTP_HOST:     {{ .Values.config.TOWER_SMTP_HOST }}
-  TOWER_SMTP_PORT:     {{ .Values.config.TOWER_SMTP_PORT }}
+  TOWER_SMTP_PORT:     "{{ .Values.config.TOWER_SMTP_PORT }}"
   TOWER_SMTP_USER:     {{ .Values.config.TOWER_SMTP_USER }}
   TOWER_SMTP_PASSWORD: {{ .Values.config.TOWER_SMTP_PASSWORD }}
   TOWER_REDIS_URL: {{ .Values.config.TOWER_REDIS_URL }}
