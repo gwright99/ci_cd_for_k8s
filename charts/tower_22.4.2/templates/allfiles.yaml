@@ -347,25 +347,47 @@ spec:
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
+# metadata:
+#   name: front-ingress
+#   annotations:
+#     kubernetes.io/ingress.class: alb
+#     alb.ingress.kubernetes.io/group.name: tower-dev
+#     alb.ingress.kubernetes.io/ssl-redirect: "443"
+#     alb.ingress.kubernetes.io/tags: CreatedBy=CS, VantaOwner=graham.wright@seqera.io, VantaDescription=Nextflow Tower ALB, Environment=development
+#     alb.ingress.kubernetes.io/group.order: "344"
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/certificate-arn: {{ $.Values.ingress.CERT_ARN }}
+#     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+#     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+#     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
+#     alb.ingress.kubernetes.io/load-balancer-attributes: >
+#       idle_timeout.timeout_seconds=301,
+#       routing.http2.enabled=false,
+#       access_logs.s3.enabled=true,
+#       access_logs.s3.bucket=YOUR-LOGS-S3-BUCKET,
+#       access_logs.s3.prefix=YOUR-LOGS-PREFIX
 metadata:
-  name: front-ingress
   annotations:
-    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:128997144437:certificate/60acfe8d-a8b8-47b4-ab1b-02dd77041960
     alb.ingress.kubernetes.io/group.name: tower-dev
+    alb.ingress.kubernetes.io/group.order: "344"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/load-balancer-attributes: |-
+      idle_timeout.timeout_seconds=301, routing.http2.enabled=false
+      , deletion_protection.enabled=true
+      , routing.http.drop_invalid_header_fields.enabled=true
+      , access_logs.s3.enabled=true,access_logs.s3.bucket=development-tower-alb-access-log,access_logs.s3.prefix=tower
+    alb.ingress.kubernetes.io/load-balancer-name: tower-dev
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
     alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/tags: CreatedBy=CS, VantaOwner=graham.wright@seqera.io, VantaDescription=Nextflow Tower ALB, Environment=development
-    alb.ingress.kubernetes.io/group.order: "344"
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/certificate-arn: {{ $.Values.ingress.CERT_ARN }}
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
-    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
-    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
-    alb.ingress.kubernetes.io/load-balancer-attributes: >
-      idle_timeout.timeout_seconds=301,
-      routing.http2.enabled=false,
-      access_logs.s3.enabled=true,
-      access_logs.s3.bucket=YOUR-LOGS-S3-BUCKET,
-      access_logs.s3.prefix=YOUR-LOGS-PREFIX
+    alb.ingress.kubernetes.io/actions.response-404: >
+          {"type":"fixed-response","fixedResponseConfig":{"contentType":"text/plain","statusCode":"404","messageBody":"404 Not found"}}
+    kubernetes.io/ingress.class: alb
+  name: graham-tower
+  namespace: graham
 spec:
   rules:
     #- host: YOUR-TOWER-HOST-NAME
