@@ -46,37 +46,37 @@ data:
         starttls:
           enable: false
           required: false
-# ---
-#  kind: StorageClass
-#  apiVersion: storage.k8s.io/v1
-#  metadata:
-#    name: standard
-#    labels:
-#      app: redis
-#    annotations:
-#      storageclass.beta.kubernetes.io/is-default-class: "true"
-#  provisioner: kubernetes.io/aws-ebs
-#  parameters:
-#    type: gp2
-#    fsType: ext4
-#  allowVolumeExpansion: true
-#  reclaimPolicy: Retain
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: redis-data
-  labels:
-    app: redis
-spec:
-  accessModes:
-    #- ReadWriteOnce
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 10Gi
-  # storageClassName: standard
-  storageClassName: {{ .Values.redis.REDIS_STORAGE_CLASS_NAME }}
+ kind: StorageClass
+ apiVersion: storage.k8s.io/v1
+ metadata:
+   name: standard
+   labels:
+     app: redis
+   annotations:
+     storageclass.beta.kubernetes.io/is-default-class: "true"
+ provisioner: kubernetes.io/aws-ebs
+ parameters:
+   type: gp2
+   fsType: ext4
+ allowVolumeExpansion: true
+ reclaimPolicy: Retain
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: redis-data
+#   labels:
+#     app: redis
+# spec:
+#   accessModes:
+#     #- ReadWriteOnce
+#     - ReadWriteMany
+#   resources:
+#     requests:
+#       storage: 10Gi
+#   # storageClassName: standard
+#   storageClassName: {{ .Values.redis.REDIS_STORAGE_CLASS_NAME }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -123,7 +123,9 @@ spec:
           persistentVolumeClaim:
             claimName: redis-data
         - name: host-sys
-          emptyDir: {}
+          # V10 - empty dir seemed to cause init container to crash.
+          # emptyDir: {}
+
           # hostPath:
           #   path: /sys
       restartPolicy: Always
