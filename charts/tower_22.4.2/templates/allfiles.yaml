@@ -382,7 +382,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
     alb.ingress.kubernetes.io/ssl-redirect: "443"
-    alb.ingress.kubernetes.io/tags: CreatedBy=CS, VantaOwner=graham.wright@seqera.io, VantaDescription=Nextflow Tower ALB, Environment=development
+    alb.ingress.kubernetes.io/tags: CreatedBy=DevOps, VantaOwner=adianny@seqera.io, VantaDescription=Nextflow Tower ALB, Environment=development
     alb.ingress.kubernetes.io/actions.response-404: >
           {"type":"fixed-response","fixedResponseConfig":{"contentType":"text/plain","statusCode":"404","messageBody":"404 Not found"}}
     kubernetes.io/ingress.class: alb
