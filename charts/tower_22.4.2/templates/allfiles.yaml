@@ -7,7 +7,7 @@ metadata:
     app: backend-cfg
 data:
   TOWER_SERVER_URL:        {{ .Values.config.TOWER_SERVER_URL }}
-  TOWER_CONTACT_EMAIL:     "support@tower.nf"
+  TOWER_CONTACT_EMAIL:     {{ .Values.config.TOWER_CONTACT_EMAIL }}
   TOWER_JWT_SECRET:        {{ .Values.config.TOWER_JWT_SECRET }}
   TOWER_CRYPTO_SECRETKEY:  {{ .Values.config.TOWER_CRYPTO_SECRETKEY }}
   TOWER_LICENSE:           {{ .Values.config.TOWER_LICENSE }}
