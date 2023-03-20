@@ -123,8 +123,9 @@ spec:
           persistentVolumeClaim:
             claimName: redis-data
         - name: host-sys
-          hostPath:
-            path: /sys
+          emptyDir: {}
+          # hostPath:
+          #   path: /sys
       restartPolicy: Always
 ---
 apiVersion: v1
