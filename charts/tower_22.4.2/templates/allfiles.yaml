@@ -46,21 +46,22 @@ data:
         starttls:
           enable: false
           required: false
----
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: standard
-  labels:
-    app: redis
-  annotations:
-    storageclass.beta.kubernetes.io/is-default-class: "true"
-provisioner: kubernetes.io/aws-ebs
-parameters:
-  type: gp2
-  fsType: ext4
-allowVolumeExpansion: true
-reclaimPolicy: Retain
+# ---
+# Commenting out because already exists on cluster and breaks Helm install
+# kind: StorageClass
+# apiVersion: storage.k8s.io/v1
+# metadata:
+#   name: standard
+#   labels:
+#     app: redis
+#   annotations:
+#     storageclass.beta.kubernetes.io/is-default-class: "true"
+# provisioner: kubernetes.io/aws-ebs
+# parameters:
+#   type: gp2
+#   fsType: ext4
+# allowVolumeExpansion: true
+# reclaimPolicy: Retain
 
 ---
 apiVersion: v1
