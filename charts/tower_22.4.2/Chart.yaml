@@ -20,5 +20,8 @@ keywords:
 #- name: postgresql
 #  repository: https://charts.bitnami.com/bitnami
 #  version: 10.8.0 
-
+dependencies:
+- name:           mysql
+  repository:     https://charts.bitnami.com/bitnami
+  version:        8.0.32
 #a
