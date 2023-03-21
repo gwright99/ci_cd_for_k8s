@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+        - name: "cr.seqera.io"
+      containers:
+        - name: frontend
+          image: cr.seqera.io/private/nf-tower-enterprise/frontend:v22.4.2
+          ports:
+            - containerPort: 80
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  # type: LoadBalancer
+  type: NodePort
+  ports:
+    - port: 80
+  selector:
+    app: "frontend"
