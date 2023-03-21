@@ -1,7 +1,7 @@
 apiVersion: v2
 name: nextflow-tower
 description: Helm Chart to install Nextflow Tower
-version: 0.1.19
+version: 0.1.20
 type: application
 # icon: https://salaboy.files.wordpress.com/2019/07/avatar.png
 appVersion: 22.4.2
@@ -23,5 +23,5 @@ keywords:
 dependencies:
 - name:           mysql
   repository:     "https://charts.bitnami.com/bitnami"
-  version:        "8.0.32"
+  version:        "9.6.0"  # mysqlv8.0.32
 #a
