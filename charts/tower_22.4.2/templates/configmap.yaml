@@ -28,6 +28,9 @@ data:
   TOWER_SMTP_USER:      {{ .Values.config.TOWER_SMTP_USER }}
   TOWER_SMTP_PASSWORD:  {{ .Values.config.TOWER_SMTP_PASSWORD }}
 
+  TOWER_ENABLE_WAVE:  {{ .Values.config.TOWER_ENABLE_WAVE }}
+  WAVE_SERVER_URL:  {{ .Values.config.WAVE_SERVER_URL }}
+
   TOWER_REDIS_URL:      {{ .Values.config.TOWER_REDIS_URL }}
 ---
 kind: ConfigMap
