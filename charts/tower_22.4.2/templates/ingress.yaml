@@ -24,6 +24,11 @@ metadata:
   name: graham-tower
   namespace: graham
 spec:
+  # defaultBackend:
+  #   service:
+  #     name: frontend
+  #     port:
+  #       number: 80
   rules:
     #- host: YOUR-TOWER-HOST-NAME
     - host: {{ .Values.ingress.HOST_URL }}
@@ -35,4 +40,11 @@ spec:
                 port:
                   number: 80
             path: /*
+            pathType: ImplementationSpecific
+          - backend:
+              service:
+                name: backend-api
+                port:
+                  number: 8080
+            path: /api
             pathType: ImplementationSpecific
