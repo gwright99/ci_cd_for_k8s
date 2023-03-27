@@ -2,13 +2,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: {{ .Release.Name }}-backend
   labels:
-    app: backend
+    app: {{ .Release.Name }}-backend
 spec:
   selector:
     matchLabels:
-      app: backend
+      app: {{ .Release.Name }}-backend
   strategy:
     rollingUpdate:
       maxUnavailable: 0
@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       labels:
-        app: backend
+        app: {{ .Release.Name }}-backend
     spec:
       initContainers:
       - name: wait-for-redis
@@ -31,18 +31,21 @@ spec:
         # args: [ 'sh', '-c', "while [[ \"$(curl https://gw.dev-tower.net -s -o /dev/null -L -w ''%{http_code}'' ${0})\" != \"200\" ]]; do echo 'sleep 2'; sleep 2; done; echo \"I made it out of the loop\";" ]
         # Hypothesis: Wave cant hit ingress to finsih handshake. Tried curling ingress, not working. Now just doing plain sleep.
         args: [ 'sh', '-c', 'sleep 30' ]
+# {{/*- include "ktower.imagepullsecret" . | indent 6 */}}
       imagePullSecrets:
-        - name: "cr.seqera.io"
-      volumes:
-        - name: config-volume
-          configMap:
-            name: tower-yml
+        - name: "{{ .Values.image.pullSecret }}"
+        #- name: "cr.seqera.io"
+{{- include "ktower.definetowercmvolume" . | indent 6 }}
+      # volumes:
+      #   - name: config-volume
+      #     configMap:
+      #       name: tower-yml
       containers:
         - name: backend
-          image: cr.seqera.io/private/nf-tower-enterprise/backend:v22.4.2
+          image: "{{ $.Values.image.backendImage }}:{{ $.Values.image.backendTag }}"
           envFrom:
             - configMapRef:
-                name: tower-backend-cfg
+                name: {{ .Release.Name }}-tower-backend-cfg
           env:
             - name: MICRONAUT_ENVIRONMENTS
               value: "prod,redis,ha"
@@ -76,22 +79,22 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend
+  name: {{ .Release.Name }}-backend
   labels:
-    app: backend
+    app: {{ .Release.Name }}-backend
 spec:
   ports:
     - name: http
       port: 8080
       targetPort: 8080
   selector:
-    app: backend
+    app: {{ .Release.Name }}-backend
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-api
+  name: {{ .Release.Name }}-backend-api
 spec:
   ports:
     - port: 8080
@@ -99,4 +102,4 @@ spec:
       protocol: TCP
   type: NodePort
   selector:
-    app: backend
+    app: {{ .Release.Name }}-backend

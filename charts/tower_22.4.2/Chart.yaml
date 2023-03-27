@@ -21,9 +21,11 @@ keywords:
 #  repository: https://charts.bitnami.com/bitnami
 #  version: 10.8.0 
 
+
 # DECISION - Mar 21/23 - the inclusion of subcharts is more troublesome than it initially appears useful.
 # Idea is to deploy MySQL separately first and then deploy Tower afterwards, after manual customization.
 # dependencies:
 # - name:           mysql
 #   repository:     "https://charts.bitnami.com/bitnami"
 #   version:        "9.6.0"  # mysqlv8.0.32
+#   condition: mysql.enabled

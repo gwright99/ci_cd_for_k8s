@@ -21,7 +21,7 @@ metadata:
     alb.ingress.kubernetes.io/actions.response-404: >
           {"type":"fixed-response","fixedResponseConfig":{"contentType":"text/plain","statusCode":"404","messageBody":"404 Not found"}}
     kubernetes.io/ingress.class: alb
-  name: graham-tower
+  name: {{ .Release.Name }}-graham-tower
   namespace: graham
 spec:
   # defaultBackend:
@@ -36,14 +36,14 @@ spec:
         paths:
           - backend:
               service:
-                name: frontend
+                name: {{ .Release.Name }}-frontend
                 port:
                   number: 80
             path: /*
             pathType: ImplementationSpecific
           - backend:
               service:
-                name: backend-api
+                name: {{ .Release.Name }}-backend-api
                 port:
                   number: 8080
             path: /api
