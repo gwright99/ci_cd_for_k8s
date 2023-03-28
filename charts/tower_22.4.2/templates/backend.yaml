@@ -19,30 +19,17 @@ spec:
         app: {{ .Release.Name }}-backend
     spec:
       initContainers:
-      - name: wait-for-redis
-        image: redis:7.0.10
-        imagePullPolicy: IfNotPresent
-        #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-        args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-      - name: wait-for-ingress
-        image: nginx:1.23.3
-        imagePullPolicy: IfNotPresent
-        #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-        # args: [ 'sh', '-c', "while [[ \"$(curl https://gw.dev-tower.net -s -o /dev/null -L -w ''%{http_code}'' ${0})\" != \"200\" ]]; do echo 'sleep 2'; sleep 2; done; echo \"I made it out of the loop\";" ]
-        # Hypothesis: Wave cant hit ingress to finsih handshake. Tried curling ingress, not working. Now just doing plain sleep.
-        args: [ 'sh', '-c', 'sleep 30' ]
-# {{/*- include "ktower.imagepullsecret" . | indent 6 */}}
-      imagePullSecrets:
-        - name: "{{ .Values.image.pullSecret }}"
-        #- name: "cr.seqera.io"
-{{- include "ktower.definetowercmvolume" . | indent 6 }}
-      # volumes:
-      #   - name: config-volume
-      #     configMap:
-      #       name: tower-yml
+        - name: wait-for-redis
+          image: {{ .Values.images.init.check_redis_available.fullimage | quote }}
+          imagePullPolicy: {{ .Values.images.init.check_redis_available | quote }}
+          args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+      volumes:
+        - name: config-volume
+          configMap:
+            name: tower-yml
       containers:
         - name: backend
-          image: "{{ $.Values.image.backendImage }}:{{ $.Values.image.backendTag }}"
+          image: {{ .Values.images.backend.main.fullimage | quote }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tower-backend-cfg
@@ -57,10 +44,10 @@ spec:
               subPath: tower.yml
           resources:
             requests:
-              cpu: "1"
-              memory: "1200Mi"
+              cpu: {{ .Values.resources.backend.cpu.request | quote }}
+              memory: {{ .Values.resources.backend.memory.request | quote }}
             limits:
-              memory: "4200Mi"
+              memory: {{ .Values.resources.backend.memory.limit | quote }}
           readinessProbe:
             httpGet:
               path: /health

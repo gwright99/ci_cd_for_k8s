@@ -14,14 +14,19 @@ spec:
       labels:
         app: {{ .Release.Name }}-cron
     spec:
-{{- include "ktower.imagepullsecret" . | indent 6 }}
+# {{/*- include "ktower.imagepullsecret" . | indent 6 */}}
+      imagePullSecrets:
+        - name: "{{ .Values.images.imagepullsecret | quote }}"
+
       volumes:
         - name: config-volume
           configMap:
             name: tower-yml
+
       initContainers:
-        - name: migrate-db
-          image: "{{ $.Values.image.backendImage }}:{{ $.Values.image.backendTag }}"
+        - name: 01-migrate-db
+          image: "{{ $.Values.images.cron.main.image }}:{{ $.Values.images.cron.main.tag }}"
+          imagePullPolicy: "{{ .Values.images.cron.main.pullpolicy | quote }}"
           command: ["sh", "-c", "/migrate-db.sh"]
           envFrom:
             - configMapRef:
@@ -30,21 +35,25 @@ spec:
             - name: config-volume
               mountPath: /tower.yml
               subPath: tower.yml
-        - name: wait-for-redis
-          image: redis:7.0.10
-          imagePullPolicy: IfNotPresent
-          #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+
+        - name: 02-wait-for-redis
+          image: "{{ .Values.images.init.check_redis_available.image | quote }}:{{.Values.images.init.check_redis_available.tag | quote }}"
+          imagePullPolicy: "{{ .Values.images.init.check_redis_available.pullpolicy | quote }}"
+          #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "..."; ' ]
           args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-        - name: wait-for-ingress
-          image: nginx:1.23.3
-          imagePullPolicy: "{{ $.Values.image.pullPolicy }}"
+
+        - name: 03-wait-for-ingress
+          image: "{{ .Values.images.init.check_ingress_available.image | quote }}:{{.Values.images.init.check_ingress_available.tag | quote }}"
+          imagePullPolicy: "{{ .Values.images.init.check_ingress_available.pullPolicy }}"
           #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
           # args: [ 'sh', '-c', "while [[ \"$(curl https://gw.dev-tower.net -s -o /dev/null -L -w ''%{http_code}'' ${0})\" != \"200\" ]]; do echo 'sleep 2'; sleep 2; done; echo \"I made it out of the loop\";" ]
-          # Hypothesis: Wave cant hit ingress to finsih handshake. Tried curling ingress, not working. Now just doing plain sleep.
+          # Tried curling ingress, not working. Now just doing plain sleep.
           args: [ 'sh', '-c', 'sleep 30' ]
+
       containers:
         - name: backend
-          image: "{{ $.Values.image.backendImage }}:{{ $.Values.image.backendTag }}"
+          image: "{{ $.Values.images.cron.main.image }}:{{ $.Values.images.cron.main.tag }}"
+          imagePullPolicy: "{{ .Values.images.cron.main.pullpolicy | quote }}"
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tower-backend-cfg
