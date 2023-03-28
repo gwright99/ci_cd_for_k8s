@@ -2,9 +2,9 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: tower-backend-cfg
+  name: {{ .Release.Name }}-tower-backend-cfg
   labels:
-    app: backend-cfg
+    app: {{ .Release.Name }}-backend-cfg
 data:
   TOWER_SERVER_URL:        {{ .Values.config.TOWER_SERVER_URL }}
   TOWER_CONTACT_EMAIL:     {{ .Values.config.TOWER_CONTACT_EMAIL }}
@@ -31,16 +31,18 @@ data:
   TOWER_ENABLE_WAVE:  "{{ .Values.config.TOWER_ENABLE_WAVE }}"
   WAVE_SERVER_URL:  "{{ .Values.config.WAVE_SERVER_URL }}"
 
-  TOWER_REDIS_URL:      {{ .Values.config.TOWER_REDIS_URL }}
+  # Getting annoyed making this work. Just defaulting to `redis://redis:6379` so I can get on with things
+  # TOWER_REDIS_URL: {{ .Values.redis.TOWER_REDIS_URL | default (printf "redis://%s-redis:6379" .Release.Name) }}
+  TOWER_REDIS_URL: {{ .Values.redis.TOWER_REDIS_URL }}
 
   TOWER_LOG_LEVEL: TRACE
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: tower-yml
+  name: {{ .Release.Name }}-tower-yml
   labels:
-    app: backend-cfg
+    app: {{ .Release.Name }}-backend-cfg
 data:
   tower.yml: |
     mail:

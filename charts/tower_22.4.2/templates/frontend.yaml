@@ -2,24 +2,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: {{ .Release.Name }}-frontend
   labels:
-    app: frontend
+    app: {{ .Release.Name }}-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: {{ .Release.Name }}-frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: {{ .Release.Name }}-frontend
     spec:
+# {{/*- include "ktower.imagepullsecret" . | indent 6 */}}
       imagePullSecrets:
-        - name: "cr.seqera.io"
+        - name: {{ .Values.images.imagepullsecret | quote }}
       containers:
         - name: frontend
-          image: cr.seqera.io/private/nf-tower-enterprise/frontend:v22.4.2
+          {{- with .Values.images.frontend.main }}
+          # image: cr.seqera.io/private/nf-tower-enterprise/frontend:v22.4.2
+          image: {{ printf "%s:%s" .image .tag | quote }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
+          #command: [ "sh -c sed 's/backend:8080/{{ .Release.Name }}-backend:8080/g' /etc/nginx/nginx.conf && /docker-entrypoint.sh" ]
+          # args: [ , "nginx", "-g", "daemon off" ]
+          # args: ["sed 's/backend:8080/{{ .Release.Name }}-backend:8080/g' /etc/nginx/nginx.conf && nginx -g daemon off" ]
+          # args: ["sh -c 'sed \"s/backend:8080/{{ .Release.Name }}-backend:8080/g\" /etc/nginx/nginx.conf && nginx -g daemon off" ]
+          # args: ["sh -c 'sed \"s/backend:8080/{{ .Release.Name }}-backend:8080/g\" /etc/nginx/nginx.conf && nginx -g \"daemon off;\"'"  ]
+          #args: ["echo hello"  ]
+          # args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+          # command: [ "/bin/sh -c \"sed 's/backend:8080/{{ .Release.Name }}-backend:8080/g' /etc/nginx/nginx.conf && /docker-entrypoint.sh nginx -g 'daemon off;\"" ]
+          command: [ "/bin/sh" ]
+          args: [ "-c", "sed -i 's/backend:8080/{{ .Release.Name }}-backend:8080/g' /etc/nginx/nginx.conf && nginx -g 'daemon off;'" ]
           ports:
             - containerPort: 80
       restartPolicy: Always
@@ -28,11 +43,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
+  name: {{ .Release.Name }}-frontend
 spec:
   # type: LoadBalancer
   type: NodePort
   ports:
     - port: 80
   selector:
-    app: "frontend"
+    app: {{ .Release.Name }}-frontend

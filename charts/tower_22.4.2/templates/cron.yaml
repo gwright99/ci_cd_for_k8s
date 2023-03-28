@@ -2,53 +2,69 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cron
+  name: {{ .Release.Name }}-cron
   labels:
-    app: cron
+    app: {{ .Release.Name }}-cron
 spec:
   selector:
     matchLabels:
-      app: cron
+      app: {{ .Release.Name }}-cron
   template:
     metadata:
       labels:
-        app: cron
+        app: {{ .Release.Name }}-cron
     spec:
+# {{/*- include "ktower.imagepullsecret" . | indent 6 */}}
       imagePullSecrets:
-        - name: "cr.seqera.io"
+        - name: {{ .Values.images.imagepullsecret | quote }}
+
       volumes:
         - name: config-volume
           configMap:
-            name: tower-yml
+            name: {{ .Release.Name }}-tower-yml
+
       initContainers:
-        - name: migrate-db
-          image: cr.seqera.io/private/nf-tower-enterprise/backend:v22.4.2
+        - name: 01-migrate-db
+          {{-  with .Values.images.cron.main }}
+          image: {{ printf "%s:%s" .image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
           command: ["sh", "-c", "/migrate-db.sh"]
           envFrom:
             - configMapRef:
-                name: tower-backend-cfg
+                name: {{ .Release.Name }}-tower-backend-cfg
           volumeMounts:
             - name: config-volume
               mountPath: /tower.yml
               subPath: tower.yml
-        - name: wait-for-redis
-          image: redis:7.0.10
-          imagePullPolicy: IfNotPresent
-          #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+
+        - name: 02-wait-for-redis
+          {{- with .Values.images.init.check_redis_available }}
+          image: {{ printf "%s:%s" .image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
+          #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "..."; ' ]
           args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-        - name: wait-for-ingress
-          image: nginx:1.23.3
-          imagePullPolicy: IfNotPresent
+
+        - name: 03-wait-for-ingress
+          {{- with .Values.images.init.check_ingress_available }}
+          image: {{ printf "%s:%s" .image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
           #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
           # args: [ 'sh', '-c', "while [[ \"$(curl https://gw.dev-tower.net -s -o /dev/null -L -w ''%{http_code}'' ${0})\" != \"200\" ]]; do echo 'sleep 2'; sleep 2; done; echo \"I made it out of the loop\";" ]
-          # Hypothesis: Wave cant hit ingress to finsih handshake. Tried curling ingress, not working. Now just doing plain sleep.
+          # Tried curling ingress, not working. Now just doing plain sleep.
           args: [ 'sh', '-c', 'sleep 30' ]
+
       containers:
         - name: backend
-          image: cr.seqera.io/private/nf-tower-enterprise/backend:v22.4.2
+          {{- with .Values.images.cron.main }}
+          image: {{ printf "%s:%s" .image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
           envFrom:
             - configMapRef:
-                name: tower-backend-cfg
+                name: {{ .Release.Name }}-tower-backend-cfg
           volumeMounts:
             - name: config-volume
               mountPath: /tower.yml

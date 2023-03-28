@@ -2,13 +2,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: {{ .Release.Name }}-backend
   labels:
-    app: backend
+    app: {{ .Release.Name }}-backend
 spec:
   selector:
     matchLabels:
-      app: backend
+      app: {{ .Release.Name }}-backend
   strategy:
     rollingUpdate:
       maxUnavailable: 0
@@ -16,33 +16,37 @@ spec:
   template:
     metadata:
       labels:
-        app: backend
+        app: {{ .Release.Name }}-backend
     spec:
       initContainers:
-      - name: wait-for-redis
-        image: redis:7.0.10
-        imagePullPolicy: IfNotPresent
-        #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-        args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-      - name: wait-for-ingress
-        image: nginx:1.23.3
-        imagePullPolicy: IfNotPresent
-        #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-        # args: [ 'sh', '-c', "while [[ \"$(curl https://gw.dev-tower.net -s -o /dev/null -L -w ''%{http_code}'' ${0})\" != \"200\" ]]; do echo 'sleep 2'; sleep 2; done; echo \"I made it out of the loop\";" ]
-        # Hypothesis: Wave cant hit ingress to finsih handshake. Tried curling ingress, not working. Now just doing plain sleep.
-        args: [ 'sh', '-c', 'sleep 30' ]
-      imagePullSecrets:
-        - name: "cr.seqera.io"
+        - name: wait-for-redis
+          {{- with .Values.images.init.check_redis_available }}
+          image: {{ .fullimage | quote }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+
+          {{/*
+          {{- if $.Values.redis.TOWER_REDIS_URL }}
+          {{- $redisurl := $.Values.redis.TOWER_REDIS_URL }}
+          {{- else }}
+          {{- $redisurl := (printf "%s-redis" $.Release.Name ) }}
+          {{- end }}
+          */}}
+
+          args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+          {{- end }}
       volumes:
         - name: config-volume
           configMap:
-            name: tower-yml
+            name: {{ .Release.Name }}-tower-yml
+
       containers:
         - name: backend
-          image: cr.seqera.io/private/nf-tower-enterprise/backend:v22.4.2
+          {{- with .Values.images.backend.main }}
+          image: {{ printf "%s:%s" .image .tag }}
+          {{- end }}
           envFrom:
             - configMapRef:
-                name: tower-backend-cfg
+                name: {{ .Release.Name }}-tower-backend-cfg
           env:
             - name: MICRONAUT_ENVIRONMENTS
               value: "prod,redis,ha"
@@ -54,10 +58,10 @@ spec:
               subPath: tower.yml
           resources:
             requests:
-              cpu: "1"
-              memory: "1200Mi"
+              cpu: {{ .Values.resources.backend.cpu.request | quote }}
+              memory: {{ .Values.resources.backend.memory.request | quote }}
             limits:
-              memory: "4200Mi"
+              memory: {{ .Values.resources.backend.memory.limit | quote }}
           readinessProbe:
             httpGet:
               path: /health
@@ -76,22 +80,22 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend
+  name: {{ .Release.Name }}-backend
   labels:
-    app: backend
+    app: {{ .Release.Name }}-backend
 spec:
   ports:
     - name: http
       port: 8080
       targetPort: 8080
   selector:
-    app: backend
+    app: {{ .Release.Name }}-backend
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-api
+  name: {{ .Release.Name }}-backend-api
 spec:
   ports:
     - port: 8080
@@ -99,4 +103,4 @@ spec:
       protocol: TCP
   type: NodePort
   selector:
-    app: backend
+    app: {{ .Release.Name }}-backend

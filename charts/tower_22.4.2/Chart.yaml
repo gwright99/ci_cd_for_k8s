@@ -1,7 +1,7 @@
 apiVersion: v2
 name: nextflow-tower
 description: Helm Chart to install Nextflow Tower
-version: 0.2.3
+version: 0.3
 type: application
 # icon: https://salaboy.files.wordpress.com/2019/07/avatar.png
 appVersion: 22.4.2
@@ -16,10 +16,6 @@ keywords:
   - helm
   - kubernetes
   - tutorial
-#dependencies:
-#- name: postgresql
-#  repository: https://charts.bitnami.com/bitnami
-#  version: 10.8.0 
 
 # DECISION - Mar 21/23 - the inclusion of subcharts is more troublesome than it initially appears useful.
 # Idea is to deploy MySQL separately first and then deploy Tower afterwards, after manual customization.
@@ -27,3 +23,4 @@ keywords:
 # - name:           mysql
 #   repository:     "https://charts.bitnami.com/bitnami"
 #   version:        "9.6.0"  # mysqlv8.0.32
+#   condition: mysql.enabled
