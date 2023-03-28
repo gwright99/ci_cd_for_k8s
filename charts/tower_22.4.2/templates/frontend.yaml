@@ -17,7 +17,7 @@ spec:
     spec:
 # {{/*- include "ktower.imagepullsecret" . | indent 6 */}}
       imagePullSecrets:
-        - name: "{{ .Values.images.imagepullsecret | quote }}"
+        - name: {{ .Values.images.imagepullsecret | quote }}
       containers:
         - name: frontend
           image: cr.seqera.io/private/nf-tower-enterprise/frontend:v22.4.2

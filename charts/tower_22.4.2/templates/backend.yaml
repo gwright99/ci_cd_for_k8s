@@ -20,9 +20,11 @@ spec:
     spec:
       initContainers:
         - name: wait-for-redis
-          image: {{ .Values.images.init.check_redis_available.fullimage | quote }}
-          imagePullPolicy: {{ .Values.images.init.check_redis_available | quote }}
+          {{- with .Values.images.init.check_redis_available }}
+          image: {{ .fullimage | quote }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
           args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+          {{- end }}
       volumes:
         - name: config-volume
           configMap:
