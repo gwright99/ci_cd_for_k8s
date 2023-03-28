@@ -1,3 +1,4 @@
+{{- if eq ( .Values.redis.enable) true }}
 # ---
 # Commenting out because already exists on cluster and breaks Helm install
 # kind: StorageClass
@@ -30,24 +31,7 @@ spec:
       storage: 10Gi
   # Changing to GP2 as per Alberto
   # storageClassName: standard
-  storageClassName: gp2
-
-# ---
-# apiVersion: v1
-# kind: PersistentVolumeClaim
-# metadata:
-#   name: redis-data
-#   labels:
-#     app: redis
-# spec:
-#   accessModes:
-#     #- ReadWriteOnce
-#     - ReadWriteMany
-#   resources:
-#     requests:
-#       storage: 10Gi
-#   # storageClassName: standard
-#   storageClassName: {{ .Values.redis.REDIS_STORAGE_CLASS_NAME }}
+  # storageClassName: {{ .Values.redis.REDIS_STORAGE_CLASS_NAME }} # | quote }} # gp2
 
 ---
 apiVersion: apps/v1
@@ -114,3 +98,4 @@ spec:
       targetPort: 6379
   selector:
     app: redis
+{{- end }}

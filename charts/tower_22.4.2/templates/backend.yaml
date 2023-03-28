@@ -23,15 +23,27 @@ spec:
           {{- with .Values.images.init.check_redis_available }}
           image: {{ .fullimage | quote }}
           imagePullPolicy: {{ .pullpolicy | quote }}
+
+          {{/*
+          {{- if $.Values.redis.TOWER_REDIS_URL }}
+          {{- $redisurl := $.Values.redis.TOWER_REDIS_URL }}
+          {{- else }}
+          {{- $redisurl := (printf "%s-redis" $.Release.Name ) }}
+          {{- end }}
+          */}}
+
           args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
           {{- end }}
       volumes:
         - name: config-volume
           configMap:
-            name: tower-yml
+            name: {{ .Release.Name }}-tower-yml
+
       containers:
         - name: backend
-          image: {{ .Values.images.backend.main.fullimage | quote }}
+          {{- with .Values.images.backend.main }}
+          image: {{ printf "%s:%s" .image .tag }}
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tower-backend-cfg

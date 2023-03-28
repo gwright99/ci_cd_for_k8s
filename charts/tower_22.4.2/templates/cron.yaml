@@ -21,12 +21,14 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: tower-yml
+            name: {{ .Release.Name }}-tower-yml
 
       initContainers:
         - name: 01-migrate-db
-          image: "{{ $.Values.images.cron.main.image }}:{{ $.Values.images.cron.main.tag }}"
-          imagePullPolicy: {{ .Values.images.cron.main.pullpolicy | quote }}
+          {{-  with .Values.images.cron.main }}
+          image: {{ printf "%s:%s" .image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
           command: ["sh", "-c", "/migrate-db.sh"]
           envFrom:
             - configMapRef:
