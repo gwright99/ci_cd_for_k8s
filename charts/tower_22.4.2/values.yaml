@@ -61,19 +61,19 @@ images:
   backend:
     main: 
       image: "cr.seqera.io/private/nf-tower-enterprise/backend"
-      tag: "v22.4.2"
+      tag: "v22.3.0-RC4" #"v22.4.2"
       pullpolicy: "IfNotPresent"
 
   cron:
     main: 
       image: "cr.seqera.io/private/nf-tower-enterprise/backend"
-      tag: "v22.4.2"
+      tag: "v22.3.0-RC4" #"v22.4.2"
       pullpolicy: "IfNotPresent"
 
   frontend:
     main: 
       image: "cr.seqera.io/private/nf-tower-enterprise/frontend"
-      tag: "v22.4.2"
+      tag: "v22.3.0-RC4" #"v22.4.2"
       pullpolicy: "IfNotPresent"
 
   init: 
