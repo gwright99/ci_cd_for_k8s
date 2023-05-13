@@ -1,0 +1,32 @@
+# RULES:
+# 1) If you use ` | quote` do not wrap the `{{ }}` block in doublequotes.
+# 2) If you need to add two values together, use `{{ printf "%s:%s" .val1 .val2 }}`
+# YAML errors reported by Helm do NOT necessarily match the same line where the error is coming from. :| 
+
+
+# ----------- TOWER Config
+config:
+  TOWER_ACCESS_TOKEN: "tbd"
+  TOWER_API_ENDPOINT: "HOSTNAME/api"
+  TOWER_AGENT_CREDENTIAL_ID: "xxx-xxx-xxx..."
+
+
+images:
+  # Leaving here for extensibility if this is run somewhere other than EKS.
+  imagepullsecret: "cr.seqera.io"
+
+  xenon:
+    main: 
+      image: "128997144437.dkr.ecr.us-east-1.amazonaws.com/cs_slurm"
+      tag: "v2"
+      pullpolicy: "IfNotPresent"
+
+# Modify defaults as necessary. We do not recommend going below specified values.
+resources:
+  xenon:
+    memory:
+      request: "1200Mi"
+      limit: "4200Mi"
+    cpu:
+      request: "1"
+      # no limit as this is managed by K8s
