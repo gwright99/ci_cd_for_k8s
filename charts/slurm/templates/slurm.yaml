@@ -20,10 +20,11 @@ spec:
     spec:
       # imagePullSecrets:
       #   - name: {{ .Values.images.imagepullsecret | quote }}
-
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
       containers:
-        - name: xenon
-          {{- with .Values.images.xenon.main }}
+        - name: slurm
+          {{- with .Values.images.slurm.main }}
           image: {{ printf "%s:%s" .image .tag }}
           {{- end }}
           env:
@@ -31,31 +32,18 @@ spec:
               value: {{ .Values.config.TOWER_ACCESS_TOKEN }}
             - name: TOWER_API_ENDPOINT
               value: {{ .Values.config.TOWER_API_ENDPOINT }}
-            - name: TOWER_AGENT_CREDENTIAL_ID
-              value: {{ .Values.config.TOWER_AGENT_CREDENTIAL_ID }}
+            - name: AGENT_CONNECTION_ID
+              value: {{ .Values.config.AGENT_CONNECTION_ID }}
           ports:
             - containerPort: 22
-
           resources:
             requests:
-              cpu: {{ .Values.resources.xenon.cpu.request | quote }}
-              memory: {{ .Values.resources.xenon.memory.request | quote }}
+              cpu: {{ .Values.resources.slurm.cpu.request | quote }}
+              memory: {{ .Values.resources.slurm.memory.request | quote }}
             limits:
-              memory: {{ .Values.resources.xenon.memory.limit | quote }}
-          # readinessProbe:
-          #   httpGet:
-          #     path: /health
-          #     port: 8080
-          #   initialDelaySeconds: 5
-          #   timeoutSeconds: 3
-          # livenessProbe:
-          #   httpGet:
-          #     path: /health
-          #     port: 8080
-          #   initialDelaySeconds: 5
-          #   timeoutSeconds: 3
-          #   failureThreshold: 10
-
+              memory: {{ .Values.resources.slurm.memory.limit | quote }}
+          command: ["/bin/bash"]
+          args: ["-c", "service munge start && service slurmctld start && service slurmd start  && cd /home  && LOGGER_LEVELS_IO_SEQERA_TOWER_AGENT=TRACE ./tw-agent $AGENT_CONNECTION_ID -u $TOWER_API_ENDPOINT --work-dir=."]
 ---
 apiVersion: v1
 kind: Service
@@ -66,7 +54,9 @@ metadata:
 spec:
   ports:
     - name: ssh
+      protocol: TCP
       port: 22
       targetPort: 22
+  type: NodePort
   selector:
     app: {{ .Release.Name }}

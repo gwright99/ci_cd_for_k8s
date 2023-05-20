@@ -18,7 +18,7 @@ images:
   xenon:
     main: 
       image: "128997144437.dkr.ecr.us-east-1.amazonaws.com/cs_slurm"
-      tag: "v2"
+      tag: "v3"
       pullpolicy: "IfNotPresent"
 
 # Modify defaults as necessary. We do not recommend going below specified values.
