@@ -2,6 +2,28 @@ apiVersion: v1
 entries:
   eks-slurm:
   - apiVersion: v2
+    appVersion: 1.0.1
+    created: "2023-05-20T14:16:40.736285167Z"
+    description: 'Helm Chart to deploy a Tower-ready Slurm instance. See: https://github.com/seqeralabs/support-tools/tree/master/cs_slurm'
+    digest: 159e374d2d28b87ec05034a2f4de7f0281b02237f228241329d282655238d16e
+    home: http://github.com/gwright99/slurm
+    keywords:
+    - cloudnative
+    - example
+    - helm
+    - kubernetes
+    - tutorial
+    - slurm
+    maintainers:
+    - email: graham.wright@seqera.io
+      name: gwright99
+      url: https://github.com/gwright99/
+    name: eks-slurm
+    type: application
+    urls:
+    - https://github.com/gwright99/ci_cd_for_k8s/releases/download/eks-slurm-1.0.1/eks-slurm-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     appVersion: "1.0"
     created: "2023-05-20T13:39:29.126792238Z"
     description: 'Helm Chart to deploy a Tower-ready Slurm instance. See: https://github.com/seqeralabs/support-tools/tree/master/cs_slurm'
@@ -598,4 +620,4 @@ entries:
     urls:
     - https://github.com/gwright99/ci_cd_for_k8s/releases/download/nextflow-tower-0.1.0/nextflow-tower-0.1.0.tgz
     version: 0.1.0
-generated: "2023-05-20T13:39:29.127029344Z"
+generated: "2023-05-20T14:16:40.736355268Z"
