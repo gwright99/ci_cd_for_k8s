@@ -4,7 +4,7 @@ description: "Helm Chart to deploy a Tower-ready Slurm instance. See: https://gi
 version: "1.0"
 type: application
 # icon: https://salaboy.files.wordpress.com/2019/07/avatar.png
-appVersion: "1.0"
+appVersion: "1.0.1"
 maintainers: 
   - name: gwright99
     email: graham.wright@seqera.io

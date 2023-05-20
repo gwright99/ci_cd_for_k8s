@@ -43,7 +43,7 @@ spec:
             limits:
               memory: {{ .Values.resources.slurm.memory.limit | quote }}
           command: ["/bin/bash"]
-          args: ["-c", "service munge start && service slurmctld start && service slurmd start  && cd /home  && LOGGER_LEVELS_IO_SEQERA_TOWER_AGENT=TRACE ./tw-agent $AGENT_CONNECTION_ID -u $TOWER_API_ENDPOINT --work-dir=."]
+          args: ["-c", "apt install -y openssh-server && service ssh start && service munge start && service slurmctld start && service slurmd start  && cd /home  && LOGGER_LEVELS_IO_SEQERA_TOWER_AGENT=TRACE ./tw-agent $AGENT_CONNECTION_ID -u $TOWER_API_ENDPOINT --work-dir=."]
 ---
 apiVersion: v1
 kind: Service
