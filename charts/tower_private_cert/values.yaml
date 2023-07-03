@@ -1,0 +1,99 @@
+# RULES:
+# 1) If you use ` | quote` do not wrap the `{{ }}` block in doublequotes.
+# 2) If you need to add two values together, use `{{ printf "%s:%s" .val1 .val2 }}`
+# YAML errors reported by Helm do NOT necessarily match the same line where the error is coming from. :| 
+
+
+# ----------- MYSQL8 Config
+# Install MYSQL ahead of time.
+mysql:
+  fullnameOverride: "mysql8"
+
+  auth:
+    rootPassword: 'tower'
+
+
+# ----------- TOWER Config
+config:
+  # Uncomment all and replace values
+  # TOWER_SERVER_URL:     "https://YOUR_HOST"
+  # TOWER_CONTACT_EMAIL:  "admin@YOUR_HOST"
+  # TOWER_JWT_SECRET:     "123456789123456789123456789123456789123456789"
+
+  # Uncomment all and replace values
+  # TOWER_DB_URL: "jdbc:mysql://NAME_OF_mysql.fullnameOverride_ABOVE/tower?useUnicode=true&characterEncoding=utf8&passwordCharacterEncoding=utf8"
+  # TOWER_DB_PASSWORD: "PASSWORD_OF_YOUR_TOWER_USER"
+  # TOWER_CRYPTO_SECRETKEY: "abc"
+  # TOWER_LICENSE: "BASE64_STRING_FROM_SEQERA_LABS"
+
+  # Uncomment all and replace values
+  # TOWER_SMTP_HOST: "email-smtp.us-east-1.amazonaws.com"
+  # TOWER_SMTP_PORT: "587"
+  # TOWER_SMTP_USER: "AAAAAAAAAAAAAAAAAAAA"
+  # TOWER_SMTP_PASSWORD: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+  # Comment these values out if you don't want your Tower implementation to use the Wave Service.
+  # Must be on Tower Enterprise 22.4.
+  TOWER_ENABLE_WAVE: "true"
+  WAVE_SERVER_URL: "https://wave.seqera.io"
+
+redis:
+  # Set `enable: true` to install a redis Stateful service.
+  # Set `enable: false` to use your own Redis implementation.
+  # If you use your own implemetation, uncomment and update `TOWER_REDIS_URL`
+  # Update REDIS_STORAGE_CLASS_NAME to the appropriate storage class on your cluster.
+  enable: true
+  # TOWER_REDIS_URL: "redis://PATH_TO_YOUR_REDIS:6379"
+  TOWER_REDIS_URL: "redis://redis:6379"
+  REDIS_STORAGE_CLASS_NAME: "gp2"
+  
+
+# Uncomment all and replace values (Note: this is AWS-specific)
+# ingress:
+#   CERT_ARN: "arn:aws:acm:REGION:ACCOUNT:certificate/CERT_ID"
+#   HOST_URL: "HOST_NAME_WITHOUT_PREFIX"
+
+
+images:
+  # Separate create with credentials provided by Seqera
+  imagepullsecret: "cr.seqera.io"
+
+  backend:
+    main: 
+      image: "cr.seqera.io/private/nf-tower-enterprise/backend"
+      tag: "v22.3.0-RC4" #"v22.4.2"
+      pullpolicy: "IfNotPresent"
+
+  cron:
+    main: 
+      image: "cr.seqera.io/private/nf-tower-enterprise/backend"
+      tag: "v22.3.0-RC4" #"v22.4.2"
+      pullpolicy: "IfNotPresent"
+
+  frontend:
+    main: 
+      image: "cr.seqera.io/private/nf-tower-enterprise/frontend"
+      tag: "v22.3.0-RC4" #"v22.4.2"
+      pullpolicy: "IfNotPresent"
+
+  init: 
+    check_redis_available:
+      fullimage: "redis:7.0.10"
+      image: redis
+      tag: 7.0.10
+      pullpolicy: "IfNotPresent"
+
+    check_ingress_available:
+      image: nginx
+      tag: 1.23.3
+      pullpolicy: "IfNotPresent"
+
+# Modify defaults as necessary. We do not recommend going below specified values.
+resources:
+  backend:
+    memory:
+      request: "1200Mi"
+      limit: "4200Mi"
+    cpu:
+      request: "1"
+      # no limit as this is managed by K8s

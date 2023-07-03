@@ -1,0 +1,195 @@
+apiVersion: v1
+data:
+  csgitlab2.dev-seqera.net.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIDkzCCAnsCFHvMQWhebLv/rr2gIDdymftDleIRMA0GCSqGSIb3DQEBCwUAMIGF
+    MQswCQYDVQQGEwJDQTEQMA4GA1UECAwHT250YXJpbzEQMA4GA1UEBwwHVG9yb250
+    bzEUMBIGA1UECgwLU2VxZXJhIExhYnMxGTAXBgNVBAsMEEN1c3RvbWVyIFN1Y2Nl
+    c3MxITAfBgNVBAMMGGNzZ2l0bGFiMi5kZXYtc2VxZXJhLm5ldDAeFw0yMzAzMDcw
+    MTQwNDJaFw0yNDAzMDYwMTQwNDJaMIGFMQswCQYDVQQGEwJDQTEQMA4GA1UECAwH
+    T250YXJpbzEQMA4GA1UEBwwHVG9yb250bzEUMBIGA1UECgwLU2VxZXJhIExhYnMx
+    GTAXBgNVBAsMEEN1c3RvbWVyIFN1Y2Nlc3MxITAfBgNVBAMMGGNzZ2l0bGFiMi5k
+    ZXYtc2VxZXJhLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmV
+    taqU3Hn4cYP/bHuvP5zvdR6bSw8Geb0XBTeC1OMnOLGZ11CJw/6splJ1eYwRzg+L
+    1JWpVlxpRpc/rWjcVxPQQpRp1XK+/ip2EhFcsDlwBY1DgbneYU1Do4nblXSNhP33
+    VuqNYUhoAqYd/xKNnjEBoxgN2o19muBArEmfIeIN80D3+oWSgdGeUG8MWvDzGvBH
+    5UskvC9cp4KLvACeCHaH/BrsDeVKlHTggefJpIY0DGnEQ6MxjZBKZpdDJ7w4y0qP
+    mG+AIwQUP9a0eO5WVzcB9ajKD3MUK1Dl8XC8LacI4GYpT+ScYOWwo4DS0e+oHrCf
+    YCLAemHUUZXHUtivPFUCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAwmk1fO6q/KZ6
+    e8yjvjEfP/AzsiNM/6F+9dyt9cKIEFg2duoQQUQa6GY3P7uOXPyOSoXTT9F9QXMT
+    DzfJf0Rm5VGnJgLQkFno62/AApBT96FvnYOKoKH4B9fGO9RqlNA/YnbOVPtQ7Ji+
+    PNwUdfMFVvNVFS7x2fZx8+D0qVwpAHIZan6gxsWgjnibQcaf1K3uvQOrZtiaUz9h
+    BRDsg1d8I/1Xs5QV3ljWIqXvpzLZVtcM/xJfVTdOMq/f1W3XIp0KYcHYmLzFRusx
+    krRh/hjQ/H5VW8DhERVbrzIVklXcy8Jy9wkHtzOJaeLkmUf+dOMgcywOvPDJ3fG2
+    NcgEVelsHQ==
+    -----END CERTIFICATE-----
+kind: ConfigMap
+metadata:
+  name: privatecert
+  namespace: graham
+---
+apiVersion: v1
+data:
+  csgitlab2.dev-seqera.net.key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEpQIBAAKCAQEAyZW1qpTcefhxg/9se68/nO91HptLDwZ5vRcFN4LU4yc4sZnX
+    UInD/qymUnV5jBHOD4vUlalWXGlGlz+taNxXE9BClGnVcr7+KnYSEVywOXAFjUOB
+    ud5hTUOjiduVdI2E/fdW6o1hSGgCph3/Eo2eMQGjGA3ajX2a4ECsSZ8h4g3zQPf6
+    hZKB0Z5Qbwxa8PMa8EflSyS8L1yngou8AJ4Idof8GuwN5UqUdOCB58mkhjQMacRD
+    ozGNkEpml0MnvDjLSo+Yb4AjBBQ/1rR47lZXNwH1qMoPcxQrUOXxcLwtpwjgZilP
+    5Jxg5bCjgNLR76gesJ9gIsB6YdRRlcdS2K88VQIDAQABAoIBAC91PHi1ZRaeA/OE
+    fcC8qGhFA7i57LjT2HNI6SSBe6ciw7kkM8m1NVxOvzVojL4KLw3/6IN3g2psKn9P
+    MX8faKy0eghAxkymZGYQt/44aRCMq/Hu86qTjSrIgsbg2FXBP48e3OqJcF7Ahecf
+    5r4ycwysiv4NvOdUq9Khxy3p9esm2+qTWd+4FY0OKVWUdybHQAmyMm4UZNLOjt9s
+    yttiD+Dd+eZUC8yeOcTzAhx6DW6lDnh9ZnbaSMxFcssOXGIkSEFbkUdaLRIu+GDK
+    BVk+Tp3az/D0fdZ+HBEoTyoPwc1QImfYMEAvnIa0q9RmpuNykWJQQo1IAxFvcrfO
+    qPqKT8ECgYEA/4X3FFfxGoE0CRg+efRhnlVJBYwzKSVt547mCgxDwY8Y5Czx+rNN
+    dExcNDq+BCatwy7O3oLdhDQeW1TDnKqrPZT1mTP4q8It2K+Tcfce/IcY7jRPlB8C
+    FzLOIT9YkInN88kFu21Bt35Bl06GHFyrg7DBis8slpFpZ8ZPq6sH0uUCgYEAyfX7
+    7j2ov9jwoqIehWTcGsd1Z/ZyfzD3ssLjdoTBXAsow2d7YBa6PH6mdzKxO+mt2ztk
+    YWwK1n72L1KbS2mt5tCqj94TIaLUn5pwDaGfhZ/5hmv+II2YrmdCEW1SOjlSW2Zb
+    xqJ2eZSLZQvQgypmIlwsqi2ORqViuxltyMYp/LECgYEAt6CVTEhamxqIw5RpqYim
+    8nsFq/fx+DrOvZ6i0Eu6EYp9b9Sg3PIn0lDh3iLs1Nza+K5VufA/srclraq/nIHF
+    5855pOyFYyF7gwHCKx9VZFLN5rkvCxoxjWxUV+5G/jAaEny/Is9Eb9JK3qpulElA
+    dLX8kH2L5HSBVDNeo9aYG8UCgYEAksvtdtnykqAJKO1V6ffJ1N0uBYco6jKZmKH3
+    2+na8iBaXM4W610ZuWcFcJa0JKxR5oxhBj8WEZrvLq6ImmQSNzdtAm2U0loc2nXT
+    BNV5shL5uC8+5EKHvBzp9OjVX+TSbAUWqGbmXrEOMUBJK03iNw9wl7HNPKRyAzUU
+    i18encECgYEA7EKkYOQY7BhHvmqO0iQQdApPzmq6jsEJgFZDU+9S2bQSJxdt1onp
+    ZyIQLj9G8bdpke+jXBV85sMxfnW9nAEEIMbreFVRous7SXUgq3uFQG3iQu071NpE
+    8ICZAK31H54Xju0ZMPKnOMGMLhp7reqj4FHwQilPg3sXqfe7m2JFfB0=
+    -----END RSA PRIVATE KEY-----
+kind: ConfigMap
+metadata:
+  name: privatekey
+  namespace: graham
+---
+apiVersion: v1
+data:
+  nginx.conf: |-
+    # http://nginx.org/en/docs/ngx_core_module.html#worker_processes
+    worker_processes auto;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        upstream backend {
+            server ktower-backend:8080;
+        }
+        # hide nginx version
+        server_tokens off;
+
+        # define the `$x_port` variable which holds the request port, if specified
+        # fetching it from the `$http_host^ variable (note it includes the `:` prefix)
+        map $http_host $x_port {
+          "~^[^\:]+:(?<p>\d+)$" :$p;
+        }
+
+        # defines `$x_scheme` variable checking `$http_x_forwarded_proto` and falling back on `scheme`
+        map $http_x_forwarded_proto $x_scheme {
+          default $scheme;
+          "~^(?<s>http|https)$" $s;
+        }
+
+        # Allow websockets connections
+        map $http_upgrade $connection_upgrade {
+          default upgrade;
+          ''      close;
+        }
+
+        # Adding
+        include /etc/nginx/mime.types;
+
+        server {
+            # listening port is defined in the file
+            # /etc/nginx/conf.d/default.conf
+
+            # Adding from privatenginx
+            # ----------------------------------------
+            server_name  localhost;
+            #listen 8080; # ssl;
+            #listen [::]:8080; # ssl;
+
+            # server_name _; #csgitlab2.dev-seqera.net;
+            #ssl_certificate /privatecert/csgitlab2.dev-seqera.net.crt;
+            #ssl_certificate_key /privatekey/csgitlab2.dev-seqera.net.key;
+
+            add_header X-XSS-Protection "1; mode=block" always;
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
+            add_header X-Frame-Options "SAMEORIGIN" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header X-Permitted-Cross-Domain-Policies none;
+            add_header Referrer-Policy same-origin;
+            add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.$host https://www.google.com https://fonts.googleapis.com https://fonts.gstatic.com https://www.gstatic.com; img-src 'self' https://*.$host https://*.gravatar.com https://*.githubusercontent.com blob: data:; worker-src blob:; child-src 'self' https://www.google.com https://*.$host blob:" always;
+            add_header Permissions-Policy "geolocation=(),midi=(),sync-xhr=(),microphone=(),camera=(),magnetometer=(),gyroscope=(),fullscreen=(self),payment=()";
+
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+            include /etc/nginx/mime.types;
+
+            gzip on;
+            gzip_min_length 1000;
+            gzip_proxied expired no-cache no-store private auth;
+            gzip_types text/plain text/css application/json application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+            location /api/ {
+                proxy_pass http://backend/;
+                proxy_http_version 1.1;
+                proxy_set_header Host $host;
+                proxy_set_header X-Forwarded-Proto $x_scheme;
+                proxy_set_header X-Forwarded-Host $host$x_port;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $connection_upgrade;
+                proxy_read_timeout 300s;
+            }
+
+            # Forward content endpoint to manage the user generated content
+            location /content/ {
+                proxy_pass http://backend/content/;
+                proxy_set_header Host $host;
+                proxy_set_header X-Forwarded-Proto $x_scheme;
+                proxy_set_header X-Forwarded-Host $host$x_port;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_read_timeout 300s;
+
+                # Remove header to allow to be shown in an iframe if it's serve from a non-origin domain
+                add_header X-Frame-Options "";
+            }
+
+            location ~ ^/(oauth|openapi)/(.*)$ {
+                set $query $2;
+                proxy_pass http://backend/$1/$query$is_args$args;
+                proxy_set_header Host $host;
+                proxy_set_header X-Forwarded-Proto $x_scheme;
+                proxy_set_header X-Forwarded-Host $host$x_port;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_read_timeout 300s;
+            }
+
+            location / {
+                try_files $uri $uri/ /index.html;
+            }
+
+            location /index.html {
+                ## this should only be used for the index page
+                add_header Cache-Control "no-store, no-cache, must-revalidate";
+                ## this should be replicated otherwise are not included due to the use
+                ## of the `add_header Cache-Control` above
+                ## those should be in sync with the ones declared in the `server` scope
+                add_header X-XSS-Protection "1; mode=block" always;
+                add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
+                add_header X-Frame-Options "SAMEORIGIN" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header X-Permitted-Cross-Domain-Policies none;
+                add_header Referrer-Policy same-origin;
+                add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.$host https://www.google.com https://fonts.googleapis.com https://fonts.gstatic.com https://www.gstatic.com; img-src 'self' https://*.$host https://*.gravatar.com https://*.githubusercontent.com blob: data:; worker-src blob:; child-src 'self' https://www.google.com https://*.$host blob:" always;
+                add_header Permissions-Policy "geolocation=(),midi=(),sync-xhr=(),microphone=(),camera=(),magnetometer=(),gyroscope=(),fullscreen=(self),payment=()";
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  name: privatedomain
+  namespace: graham
