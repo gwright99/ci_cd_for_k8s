@@ -93,6 +93,27 @@ entries:
   nextflow-tower:
   - apiVersion: v2
     appVersion: 22.3.0-RC4
+    created: "2023-11-15T17:30:19.890180598Z"
+    description: Helm Chart to install Nextflow Tower
+    digest: 6512c51426e27cd1097231ff68a915403a6e9ce028afdd87571a6f667cd504fa
+    home: http://github.com/gwright99/tower
+    keywords:
+    - cloudnative
+    - example
+    - helm
+    - kubernetes
+    - tutorial
+    maintainers:
+    - email: graham.wright@seqera.io
+      name: gwright99
+      url: https://github.com/gwright99/
+    name: nextflow-tower
+    type: application
+    urls:
+    - https://github.com/gwright99/ci_cd_for_k8s/releases/download/nextflow-tower-0.5/nextflow-tower-0.5.tgz
+    version: "0.5"
+  - apiVersion: v2
+    appVersion: 22.3.0-RC4
     created: "2023-05-13T20:19:03.993799132Z"
     description: Helm Chart to install Nextflow Tower
     digest: f9bbfe2c58f75a8394540c9d29e5634b934043e06d4e24bd844e6fd89ccac71e
@@ -620,4 +641,4 @@ entries:
     urls:
     - https://github.com/gwright99/ci_cd_for_k8s/releases/download/nextflow-tower-0.1.0/nextflow-tower-0.1.0.tgz
     version: 0.1.0
-generated: "2023-05-20T14:16:40.736355268Z"
+generated: "2023-11-15T17:30:19.890513498Z"
