@@ -35,7 +35,7 @@ data:
   # TOWER_REDIS_URL: {{ .Values.redis.TOWER_REDIS_URL | default (printf "redis://%s-redis:6379" .Release.Name) }}
   TOWER_REDIS_URL: {{ .Values.redis.TOWER_REDIS_URL }}
 
-  TOWER_LOG_LEVEL: DEBUG # TRACE
+  TOWER_LOG_LEVEL: {{ .Values.config.TOWER_LOG_LEVEL }}
   TOWER_ROOT_USERS: {{ .Values.config.TOWER_ROOT_USERS }}
 
   TOWER_OIDC_CLIENT: {{ .Values.config.TOWER_OIDC_CLIENT}}

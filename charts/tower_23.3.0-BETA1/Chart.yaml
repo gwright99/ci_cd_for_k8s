@@ -1,7 +1,7 @@
 apiVersion: v2
 name: nextflow-tower
 description: Helm Chart to install Nextflow Tower
-version: "0.1"
+version: "0.2"
 type: application
 # icon: https://salaboy.files.wordpress.com/2019/07/avatar.png
 appVersion: 23.3.0-BETA1
