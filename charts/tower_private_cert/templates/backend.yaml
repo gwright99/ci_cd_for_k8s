@@ -78,14 +78,14 @@ spec:
             initialDelaySeconds: 5
             timeoutSeconds: 3
             failureThreshold: 10
-          command: [ "/bin/sh" ]
-          # args: [ "-c", "keytool -printcert -rfc -sslserver csgitlab2.dev-seqera.net:443  >  /PRIVATE_CERT.pem && keytool -import -trustcacerts -cacerts -storepass changeit -noprompt -alias graham -file /PRIVATE_CERT.pem && ./tower.sh" ]
-          args:
-            - -c
-            - | 
-                keytool -printcert -rfc -sslserver csgitlab2.dev-seqera.net:443  >  /PRIVATE_CERT.pem; 
-                keytool -import -trustcacerts -cacerts -storepass changeit -noprompt -alias graham -file /PRIVATE_CERT.pem ; 
-                ./tower.sh
+          # command: [ "/bin/sh" ]
+          # # args: [ "-c", "keytool -printcert -rfc -sslserver csgitlab2.dev-seqera.net:443  >  /PRIVATE_CERT.pem && keytool -import -trustcacerts -cacerts -storepass changeit -noprompt -alias graham -file /PRIVATE_CERT.pem && ./tower.sh" ]
+          # args:
+          #   - -c
+          #   - | 
+          #       keytool -printcert -rfc -sslserver csgitlab2.dev-seqera.net:443  >  /PRIVATE_CERT.pem; 
+          #       keytool -import -trustcacerts -cacerts -storepass changeit -noprompt -alias graham -file /PRIVATE_CERT.pem ; 
+          #       ./tower.sh
 
 ---
 apiVersion: v1
