@@ -1,0 +1,26 @@
+apiVersion: v2
+name: nextflow-tower
+description: Helm Chart to install Nextflow Tower
+version: "0.1"
+type: application
+# icon: https://salaboy.files.wordpress.com/2019/07/avatar.png
+appVersion: 23.3.0-BETA1
+maintainers: 
+  - name: gwright99
+    email: graham.wright@seqera.io
+    url: https://github.com/gwright99/
+home: http://github.com/gwright99/tower
+keywords:
+  - cloudnative
+  - example
+  - helm
+  - kubernetes
+  - tutorial
+
+# DECISION - Mar 21/23 - the inclusion of subcharts is more troublesome than it initially appears useful.
+# Idea is to deploy MySQL separately first and then deploy Tower afterwards, after manual customization.
+# dependencies:
+# - name:           mysql
+#   repository:     "https://charts.bitnami.com/bitnami"
+#   version:        "9.6.0"  # mysqlv8.0.32
+#   condition: mysql.enabled
