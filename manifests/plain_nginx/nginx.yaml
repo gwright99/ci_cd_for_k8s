@@ -3,13 +3,13 @@ kind: Pod
 metadata:
   creationTimestamp: null
   labels:
-    run: plain_nginx
-  name: plain_nginx
+    run: plainnginx
+  name: plainnginx
   namespace: default
 spec:
   containers:
   - image: nginx:latest
-    name: plain_nginx
+    name: plainnginx
     resources: {}
   dnsPolicy: ClusterFirst
   restartPolicy: Always
