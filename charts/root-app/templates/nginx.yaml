@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: plainnginx
+  finalizers:
+  # - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io/background
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/gwright99/ci_cd_for_k8s.git
+    path: manifests/plain_nginx
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      selfHeal: true
