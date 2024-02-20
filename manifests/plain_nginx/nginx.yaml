@@ -5,7 +5,8 @@ metadata:
   labels:
     run: plainnginx
   name: plainnginx
-  namespace: default
+  # namespace: default
+  namespace: argocd
 spec:
   containers:
   - image: nginx:latest
