@@ -6,7 +6,8 @@ metadata:
   # - resources-finalizer.argocd.argoproj.io
   - resources-finalizer.argocd.argoproj.io/background
 spec:
-  project: default
+  # project: default
+  project: argocd
   source:
     repoURL: https://github.com/gwright99/ci_cd_for_k8s.git
     # Knows it's a Helm app if it finds Chart.yaml under the `path`.
