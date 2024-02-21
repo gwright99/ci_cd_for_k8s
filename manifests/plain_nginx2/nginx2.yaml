@@ -31,3 +31,20 @@ spec:
   dnsPolicy: ClusterFirst
   restartPolicy: Always
 status: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: plainnginx2-2
+  name: plainnginx2-2
+  namespace: default
+spec:
+  containers:
+  - image: nginx:latest
+    name: plainnginx2-2
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
