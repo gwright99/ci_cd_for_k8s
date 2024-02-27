@@ -26,7 +26,7 @@ spec:
       initContainers:
         - name: 01-migrate-db
           {{-  with .Values.images.cron.main }}
-          image: {{ printf "%s:%s" .image .tag }}
+          image: {{ printf "%s:%s" .migration_image .tag }}
           imagePullPolicy: {{ .pullpolicy | quote }}
           {{- end }}
           command: ["sh", "-c", "/migrate-db.sh"]
