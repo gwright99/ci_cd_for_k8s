@@ -20,4 +20,49 @@ spec:
     automated:
       selfHeal: true
       #prune: true           # Delete and replace
-      # replace: true
+      # replace: true        # Causes outOfSync issues
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: deletelambda
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+      - name: deletelambda
+        image: nginx:latest
+        command: ["/bin/bash"]
+        args: ["-c", "/purge.sh"]
+        volumeMounts:
+          - name: purgescript
+            mountPath: /
+      volumes:
+        - name: purgescript
+          configMap:
+            name: purgescript
+            items:
+              - key: purge.sh
+                path: purge.sh
+      restartPolicy: Never
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: purgescript
+  namespace: lambda
+data:
+  purge.sh: |
+    apt update && apt install -y jq
+
+    APISERVER=https://kubernetes.default.svc
+    SERVICEACCOUNT=/var/run/secrets/kubernetes.io/serviceaccount
+    NAMESPACE=$(cat ${SERVICEACCOUNT}/namespace)
+    TOKEN=$(cat ${SERVICEACCOUNT}/token)
+    CACERT=${SERVICEACCOUNT}/ca.crt
+
+    CONTAINERNAME=$(curl --cacert ${CACERT} --header "Authorization: Bearer ${TOKEN}" -X GET ${APISERVER}/api/v1/namespaces/$NAMESPACE/pods | jq '.items[].metadata.name' | echo $(grep lambda) | xargs)
+    curl --cacert ${CACERT} --header "Authorization: Bearer ${TOKEN}" -X DELETE ${APISERVER}/api/v1/namespaces/$NAMESPACE/pods/$CONTAINERNAME
