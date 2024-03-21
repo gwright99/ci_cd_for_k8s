@@ -38,10 +38,10 @@ spec:
       - name: deletelambda
         image: nginx:latest
         command: ["/bin/bash"]
-        args: ["-c", "/tmp/purge.sh"]
+        args: ["-c", "/tmp/purge/purge.sh"]
         volumeMounts:
           - name: purgescript
-            mountPath: /tmp/
+            mountPath: /tmp/purge/
       volumes:
         - name: purgescript
           configMap:
