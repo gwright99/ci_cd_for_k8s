@@ -44,6 +44,7 @@ spec:
       volumes:
         - name: purgescript
           configMap:
+            defaultMode: 0777   # To defeat ReadOnly
             name: purgescript
             items:
               - key: purge.sh
