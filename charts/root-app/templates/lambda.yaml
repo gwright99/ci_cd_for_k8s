@@ -21,33 +21,33 @@ spec:
       selfHeal: true
       #prune: true           # Delete and replace
       # replace: true        # Causes outOfSync issues
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  generateName: deletepod
-  annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
-  namespace: lambda
-spec:
-  template:
-    spec:
-      serviceAccountName: deletelambda
-      containers:
-      - name: deletelambda
-        image: nginx:latest
-        command: ["/bin/bash"]
-        args: ["-c", "/tmp/purge/purge.sh"]
-        volumeMounts:
-          - name: purgescript
-            mountPath: /tmp/purge/
-      volumes:
-        - name: purgescript
-          configMap:
-            defaultMode: 0777   # To defeat ReadOnly
-            name: purgescript
-            items:
-              - key: purge.sh
-                path: purge.sh
-      restartPolicy: Never
+# ---
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   generateName: deletepod   # CANT BE CALLED LAMBDA OR BREAKS my `purgescript` grep logic
+#   annotations:
+#     argocd.argoproj.io/hook: PreSync
+#     argocd.argoproj.io/hook-delete-policy: HookSucceeded
+#   namespace: lambda
+# spec:
+#   template:
+#     spec:
+#       serviceAccountName: deletelambda
+#       containers:
+#       - name: deletelambda
+#         image: nginx:latest
+#         command: ["/bin/bash"]
+#         args: ["-c", "/tmp/purge/purge.sh"]
+#         volumeMounts:
+#           - name: purgescript
+#             mountPath: /tmp/purge/
+#       volumes:
+#         - name: purgescript
+#           configMap:
+#             defaultMode: 0777   # To defeat ReadOnly
+#             name: purgescript
+#             items:
+#               - key: purge.sh
+#                 path: purge.sh
+#       restartPolicy: Never
