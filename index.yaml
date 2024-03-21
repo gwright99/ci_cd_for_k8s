@@ -698,6 +698,13 @@ entries:
     version: "0.1"
   root-app:
   - apiVersion: v2
+    created: "2024-03-21T01:31:38.434109055Z"
+    digest: af5277fcb6aeb1bc56dcb07a4ab23a98aa968c0bce997d725423dba3540b82f2
+    name: root-app
+    urls:
+    - https://github.com/gwright99/ci_cd_for_k8s/releases/download/root-app-1.0.27/root-app-1.0.27.tgz
+    version: 1.0.27
+  - apiVersion: v2
     created: "2024-03-21T01:17:11.57706182Z"
     digest: 85b643f5321a8544e01077e06cf91b35d720a9e6192fb574e5f807c09e4b479b
     name: root-app
@@ -879,4 +886,4 @@ entries:
     urls:
     - https://github.com/gwright99/ci_cd_for_k8s/releases/download/root-app-1.0.0/root-app-1.0.0.tgz
     version: 1.0.0
-generated: "2024-03-21T01:17:11.577425867Z"
+generated: "2024-03-21T01:31:38.434478956Z"
