@@ -33,6 +33,7 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: deletelambda
       containers:
       - name: deletelambda
         image: nginx:latest
