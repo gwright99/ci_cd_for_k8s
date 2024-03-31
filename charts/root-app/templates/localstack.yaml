@@ -20,4 +20,4 @@ spec:
     automated:
       selfHeal: true
       prune: true           # Delete and replace
-      replace: true        # Causes outOfSync issues
+      # replace: true        # Causes outOfSync issues
