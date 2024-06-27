@@ -73,8 +73,8 @@ spec:
               mountPath: /tower.yml
               subPath: tower.yml
             - name: cert-volume
-             mountPath: /data/certs/oidc.pem
-             subPath: oidc.pem
+              mountPath: /data/certs/oidc.pem
+              subPath: oidc.pem
           env:
             - name: MICRONAUT_ENVIRONMENTS
               value: "prod,redis,cron"
