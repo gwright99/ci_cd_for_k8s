@@ -11,7 +11,7 @@ data:
   TOWER_JWT_SECRET:        {{ .Values.config.TOWER_JWT_SECRET }}
   TOWER_CRYPTO_SECRETKEY:  {{ .Values.config.TOWER_CRYPTO_SECRETKEY }}
   TOWER_LICENSE:           {{ .Values.config.TOWER_LICENSE }}
-  TOWER_ENABLE_PLATFORMS:  "awsbatch-platform,slurm-platform,eks-platform,googlebatch-platform"
+  TOWER_ENABLE_PLATFORMS:  "awsbatch-platform,slurm-platform,eks-platform"
 
   TOWER_DB_URL: {{ .Values.config.TOWER_DB_URL }}
   TOWER_DB_DRIVER: "org.mariadb.jdbc.Driver"
@@ -35,24 +35,53 @@ data:
   # TOWER_REDIS_URL: {{ .Values.redis.TOWER_REDIS_URL | default (printf "redis://%s-redis:6379" .Release.Name) }}
   TOWER_REDIS_URL: {{ .Values.redis.TOWER_REDIS_URL }}
 
-  TOWER_LOG_LEVEL: DEBUG # TRACE
+  TOWER_LOG_LEVEL: {{ .Values.config.TOWER_LOG_LEVEL }}
   TOWER_ROOT_USERS: {{ .Values.config.TOWER_ROOT_USERS }}
 
   TOWER_OIDC_CLIENT: {{ .Values.config.TOWER_OIDC_CLIENT}}
   TOWER_OIDC_SECRET: {{ .Values.config.TOWER_OIDC_SECRET }}
   TOWER_OIDC_ISSUER: {{ .Values.config.TOWER_OIDC_ISSUER }}
 
-  # TOWER_FORGE_PREFIX: "GRAHAM_FORGE_POWER_"
+  # Data studio stuff
+  TOWER_DATA_STUDIO_CONNECT_URL: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL }}
+  TOWER_OIDC_PEM_PATH: {{ .Values.config.TOWER_OIDC_PEM_PATH }}
+  TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN: {{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN }}
+
+  TOWER_DATA_STUDIO_TEMPLATES_JUPYTER_REPOSITORY: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_JUPYTER_REPOSITORY }}
+  TOWER_DATA_STUDIO_TEMPLATES_JUPYTER_ICON: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_JUPYTER_ICON }}
+  TOWER_DATA_STUDIO_TEMPLATES_RSTUDIO_REPOSITORY: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_RSTUDIO_REPOSITORY }}
+  TOWER_DATA_STUDIO_TEMPLATES_RSTUDIO_ICON: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_RSTUDIO_ICON }}
+  TOWER_DATA_STUDIO_TEMPLATES_VSCODE_REPOSITORY: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_REPOSITORY }}
+  TOWER_DATA_STUDIO_TEMPLATES_VSCODE_ICON: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_ICON }}
 
   # https://stackoverflow.com/questions/66678097/does-javax-net-ssl-truststore-override-or-add-to-cacerts
   # JAVA_OPTS: "-Djdk.tls.client.protocols=TLSv1.2 -Djavax.net.debug=all -Djavax.net.ssl.trustStore=/usr/lib/jvm/java-17-amazon-corretto/lib/security/cacerts"
   # TLS details
   # JAVA_OPTS: "-Djdk.tls.client.protocols=TLSv1.2 -Djavax.net.debug=all"
-
-
   # SCM test
   #TOWER_SCM_PROVIDERS_GITLAB_USER: "abc"
   #TOWER_SCM_PROVIDERS_GITLAB_PASSWORD: "123"
+# ---
+# kind: ConfigMap
+# apiVersion: v1
+# metadata:
+#   name: {{ .Release.Name }}-data-studios-env
+#   labels:
+#     app: {{ .Release.Name }}-backend-cfg
+# data:
+#   data-studios.env: |
+#     PLATFORM_URL={{ .Values.config.TOWER_SERVER_URL }}
+
+#     CONNECT_HTTP_PORT={{ .Values.config.CONNECT_HTTP_PORT }}
+#     CONNECT_TUNNEL_URL={{ .Values.config.CONNECT_TUNNEL_URL }}
+#     CONNECT_PROXY_URL={{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL }}
+
+#     CONNECT_REDIS_ADDRESS={{ .Values.redis.TOWER_REDIS_URL }}
+#     CONNECT_REDIS_DB={{ .Values.redis.CONNECT_REDIS_DB }}
+#     CONNECT_OIDC_CLIENT_REGISTRATION_TOKEN={{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN }}
+
+#     CONNECT_SERVER_LOG_LEVEL=debug
+
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -78,6 +107,8 @@ data:
     tower:
       admin:
         root-users: "${TOWER_ROOT_USERS:[]}"
+      data-studio:
+        allowed-workspaces: null
       limits:
         max-orgs: 10
         max-teams: 20
