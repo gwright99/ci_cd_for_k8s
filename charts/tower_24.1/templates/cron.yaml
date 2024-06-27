@@ -22,6 +22,9 @@ spec:
         - name: config-volume
           configMap:
             name: {{ .Release.Name }}-tower-yml
+        - name: cert-volume
+           secret:
+             secretName: platform-oidc-certs
 
       initContainers:
         - name: 01-migrate-db
@@ -69,6 +72,9 @@ spec:
             - name: config-volume
               mountPath: /tower.yml
               subPath: tower.yml
+            - name: cert-volume
+             mountPath: /data/certs/oidc.pem
+             subPath: oidc.pem
           env:
             - name: MICRONAUT_ENVIRONMENTS
               value: "prod,redis,cron"
