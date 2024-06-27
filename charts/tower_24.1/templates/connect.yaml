@@ -31,7 +31,7 @@ spec:
             - name: CONNECT_REDIS_TLS_ENABLE
               value: {{ .Values.redis.CONNECT_REDIS_TLS_ENABLE }}
             - name: CONNECT_REDIS_DB
-              value: {{ .Values.redis.CONNECT_REDIS_DB }}
+              value: "{{ .Values.redis.CONNECT_REDIS_DB }}"
             - name: CONNECT_PROXY_URL
               value: {{ .Values.redis.TOWER_DATA_STUDIO_CONNECT_URL }}
             - name: CONNECT_TUNNEL_URL
@@ -105,7 +105,7 @@ spec:
             - name: CONNECT_REDIS_TLS_ENABLE
               value: {{ .Values.redis.CONNECT_REDIS_TLS_ENABLE }}
             - name: CONNECT_REDIS_DB
-              value: {{ .Values.redis.CONNECT_REDIS_DB }}
+              value: "{{ .Values.redis.CONNECT_REDIS_DB }}"
             - name: CONNECT_SERVER_LOG_LEVEL
               value: {{ .Values.redis.CONNECT_SERVER_LOG_LEVEL }}
 ---
