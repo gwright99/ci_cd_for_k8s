@@ -23,8 +23,8 @@ spec:
           configMap:
             name: {{ .Release.Name }}-tower-yml
         - name: cert-volume
-           secret:
-             secretName: platform-oidc-certs
+          secret:
+            secretName: platform-oidc-certs
 
       initContainers:
         - name: 01-migrate-db
