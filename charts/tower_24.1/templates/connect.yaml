@@ -13,36 +13,38 @@ spec:
       labels:
         app.kubernetes.io/component: tower-connect-proxy
     spec:
+      imagePullSecrets:
+        - name: {{ .Values.images.imagepullsecret | quote }}
       nodeSelector:
         kubernetes.io/arch: amd64
       containers:
         - name: proxy
           image: cr.seqera.io/private/nf-tower-enterprise/data-studio/connect-proxy:0.7.0
-          command:
-            - serve
+          command: [ "caddy", "serve"]
           env:
             - name: CONNECT_HTTP_PORT
-              value: {{ .Values.config.CONNECT_HTTP_PORT }}  # "80"
+              value: "{{ .Values.config.CONNECT_HTTP_PORT }}"  # "80"
               # "hostname.domain.cache.amazonaws.com:6379"
             - name: CONNECT_REDIS_ADDRESS
-              value: {{ .Values.redis.TOWER_REDIS_URL }}
+              value: "redis:6379"   #{{ .Values.redis.TOWER_REDIS_URL }}
             - name: CONNECT_REDIS_PREFIX
               value: "connect:session"
             - name: CONNECT_REDIS_TLS_ENABLE
-              value: {{ .Values.redis.CONNECT_REDIS_TLS_ENABLE }}
+              value: "{{ .Values.config.CONNECT_REDIS_TLS_ENABLE }}"
             - name: CONNECT_REDIS_DB
-              value: "{{ .Values.redis.CONNECT_REDIS_DB }}"
+              value: "{{ .Values.config.CONNECT_REDIS_DB }}"
             - name: CONNECT_PROXY_URL
-              value: {{ .Values.redis.TOWER_DATA_STUDIO_CONNECT_URL }}
+              value: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL }}
             - name: CONNECT_TUNNEL_URL
-              value: {{ .Values.redis.CONNECT_TUNNEL_URL }}  #connect-server:7070
+              value: {{ .Values.config.CONNECT_TUNNEL_URL }}  #connect-server:7070
             - name: PLATFORM_URL
-              value: {{ .Values.redis.TOWER_SERVER_URL }}
+              value: {{ .Values.config.TOWER_SERVER_URL }}
             - name: CONNECT_OIDC_CLIENT_REGISTRATION_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: connect-proxy-secret
-                  key: OIDC_CLIENT_REGISTRATION_TOKEN
+              value: "{{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN }}"
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: connect-proxy-secret
+              #     key: OIDC_CLIENT_REGISTRATION_TOKEN
             - name: LOCAL_CACHE_TTL
               value: 2m
           ports:
@@ -81,6 +83,8 @@ spec:
       labels:
         app.kubernetes.io/component: connect-server
     spec:
+      imagePullSecrets:
+        - name: {{ .Values.images.imagepullsecret | quote }}
       nodeSelector: 
         kubernetes.io/arch: amd64
       containers:
@@ -99,13 +103,13 @@ spec:
             - name: CONNECT_LISTENER_PORT
               value: "7777"
             - name: CONNECT_REDIS_ADDRESS
-              value: {{ .Values.redis.TOWER_REDIS_URL }}
+              value: "redis:6379"   #{{ .Values.redis.TOWER_REDIS_URL }}
             - name: CONNECT_REDIS_PREFIX
               value: connect:session
             - name: CONNECT_REDIS_TLS_ENABLE
-              value: {{ .Values.redis.CONNECT_REDIS_TLS_ENABLE }}
+              value: "{{ .Values.config.CONNECT_REDIS_TLS_ENABLE }}"
             - name: CONNECT_REDIS_DB
-              value: "{{ .Values.redis.CONNECT_REDIS_DB }}"
+              value: "{{ .Values.config.CONNECT_REDIS_DB }}"
             - name: CONNECT_SERVER_LOG_LEVEL
               value: {{ .Values.redis.CONNECT_SERVER_LOG_LEVEL }}
 ---
