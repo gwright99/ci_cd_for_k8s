@@ -1,0 +1,94 @@
+{{- if eq ( .Values.redis.enable) true }}
+
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: redis-data
+#   labels:
+#     app: redis
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 10Gi
+#   storageClassName: {{ .Values.redis.REDIS_STORAGE_CLASS_NAME }} # | quote }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  serviceName: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      initContainers:
+        # - name: init-sysctl
+        #   image: busybox
+        #   command:
+        #     - /bin/sh
+        #     - -c
+        #     - |
+        #       sysctl -w net.core.somaxconn=1024;
+        #       echo never > /sys/kernel/mm/transparent_hugepage/enabled
+        #   securityContext:
+        #     privileged: true
+        #   volumeMounts:
+        #     - name: host-sys
+        #       mountPath: /sys
+
+      containers:
+        - image: cr.seqera.io/public/redis:5.0.8
+          name: redis
+          args:
+            - --appendonly yes
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - mountPath: "/data"
+              name: "vol-data"
+      
+      # https://devops.stackexchange.com/questions/13939/how-to-allow-a-non-root-user-to-write-to-a-mounted-efs-in-eks
+      # Was driven by the `chown '.'` error when switching from EBS to EFS. Seems to be tied to config of EFS-SC provisioner
+      # https://github.com/kubernetes-sigs/aws-efs-csi-driver/tree/master/examples/kubernetes/dynamic_provisioning
+      # https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/300
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1337
+        fsGroup: 1337
+
+      volumes:
+        - name: vol-data
+          # persistentVolumeClaim:
+          #   claimName: redis-efs-data  #redis-data
+          emptyDir: {}
+        - name: host-sys
+          # V10 - empty dir seemed to cause init container to crash.
+          # emptyDir: {}
+          hostPath:
+            path: /sys
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+{{- end }}

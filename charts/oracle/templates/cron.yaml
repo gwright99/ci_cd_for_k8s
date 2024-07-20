@@ -1,0 +1,95 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-cron
+  labels:
+    app: {{ .Release.Name }}-cron
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-cron
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-cron
+    spec:
+# {{/*- include "ktower.imagepullsecret" . | indent 6 */}}
+      imagePullSecrets:
+        - name: {{ .Values.images.imagepullsecret | quote }}
+
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-tower-yml
+        - name: cert-volume
+          secret:
+            secretName: {{ .Values.config.TOWER_OIDC_PEM_SECRET_NAME }}
+
+      initContainers:
+        - name: 01-migrate-db
+          {{-  with .Values.images.cron.main }}
+          image: {{ printf "%s:%s" .migration_image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
+          command: ["sh", "-c", "/migrate-db.sh"]
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-tower-backend-cfg
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tower.yml
+              subPath: tower.yml
+
+        - name: 02-wait-for-redis
+          {{- with .Values.images.init.check_redis_available }}
+          image: {{ printf "%s:%s" .image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
+          #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "..."; ' ]
+          args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+
+        - name: 03-wait-for-ingress
+          {{- with .Values.images.init.check_ingress_available }}
+          image: {{ printf "%s:%s" .image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
+          #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+          # args: [ 'sh', '-c', "while [[ \"$(curl https://gw.dev-tower.net -s -o /dev/null -L -w ''%{http_code}'' ${0})\" != \"200\" ]]; do echo 'sleep 2'; sleep 2; done; echo \"I made it out of the loop\";" ]
+          # Tried curling ingress, not working. Now just doing plain sleep.
+          args: [ 'sh', '-c', 'sleep 30' ]
+
+      containers:
+        - name: backend
+          {{- with .Values.images.cron.main }}
+          image: {{ printf "%s:%s" .image .tag }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-tower-backend-cfg
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tower.yml
+              subPath: tower.yml
+            - name: cert-volume
+              mountPath: /data/certs/oidc.pem
+              subPath: tls.key
+          env:
+            - name: MICRONAUT_ENVIRONMENTS
+              value: "prod,redis,cron"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 10

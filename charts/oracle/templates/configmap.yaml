@@ -1,0 +1,139 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-tower-backend-cfg
+  labels:
+    app: {{ .Release.Name }}-backend-cfg
+data:
+  TOWER_SERVER_URL:        {{ .Values.config.TOWER_SERVER_URL }}
+  TOWER_CONTACT_EMAIL:     {{ .Values.config.TOWER_CONTACT_EMAIL }}
+  TOWER_JWT_SECRET:        {{ .Values.config.TOWER_JWT_SECRET }}
+  TOWER_CRYPTO_SECRETKEY:  {{ .Values.config.TOWER_CRYPTO_SECRETKEY }}
+  TOWER_LICENSE:           {{ .Values.config.TOWER_LICENSE }}
+  TOWER_ENABLE_PLATFORMS:  "awsbatch-platform,slurm-platform,eks-platform"
+
+  TOWER_DB_URL: {{ .Values.config.TOWER_DB_URL }}
+  TOWER_DB_DRIVER: "org.mariadb.jdbc.Driver"
+  TOWER_DB_USER: "tower"
+  TOWER_DB_PASSWORD: {{ .Values.config.TOWER_DB_PASSWORD }}
+  TOWER_DB_DIALECT: "io.seqera.util.MySQL55DialectCollateBin"
+  TOWER_DB_MIN_POOL_SIZE: "2"
+  TOWER_DB_MAX_POOL_SIZE: "10"
+  TOWER_DB_MAX_LIFETIME: "180000"
+  FLYWAY_LOCATIONS: "classpath:db-schema/mysql"
+
+  TOWER_ENABLE_AWS_SES: "false"
+  TOWER_SMTP_HOST:      {{ .Values.config.TOWER_SMTP_HOST }}
+  TOWER_SMTP_PORT:      "{{ .Values.config.TOWER_SMTP_PORT }}"
+  TOWER_SMTP_USER:      {{ .Values.config.TOWER_SMTP_USER }}
+  TOWER_SMTP_PASSWORD:  {{ .Values.config.TOWER_SMTP_PASSWORD }}
+
+  TOWER_ENABLE_WAVE:  "{{ .Values.config.TOWER_ENABLE_WAVE }}"
+  WAVE_SERVER_URL:  "{{ .Values.config.WAVE_SERVER_URL }}"
+
+  # Getting annoyed making this work. Just defaulting to `redis://redis:6379` so I can get on with things
+  # TOWER_REDIS_URL: {{ .Values.redis.TOWER_REDIS_URL | default (printf "redis://%s-redis:6379" .Release.Name) }}
+  TOWER_REDIS_URL: {{ .Values.redis.TOWER_REDIS_URL }}
+
+  TOWER_LOG_LEVEL: {{ .Values.config.TOWER_LOG_LEVEL }}
+  TOWER_ROOT_USERS: {{ .Values.config.TOWER_ROOT_USERS }}
+
+  TOWER_OIDC_CLIENT: {{ .Values.config.TOWER_OIDC_CLIENT}}
+  TOWER_OIDC_SECRET: {{ .Values.config.TOWER_OIDC_SECRET }}
+  TOWER_OIDC_ISSUER: {{ .Values.config.TOWER_OIDC_ISSUER }}
+
+  # Data studio stuff
+  TOWER_DATA_STUDIO_CONNECT_URL: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL }}
+  TOWER_OIDC_PEM_PATH: {{ .Values.config.TOWER_OIDC_PEM_PATH }}
+  TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN: {{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN }}
+
+  TOWER_DATA_STUDIO_TEMPLATES_JUPYTER_REPOSITORY: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_JUPYTER_REPOSITORY }}
+  TOWER_DATA_STUDIO_TEMPLATES_JUPYTER_ICON: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_JUPYTER_ICON }}
+  TOWER_DATA_STUDIO_TEMPLATES_RSTUDIO_REPOSITORY: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_RSTUDIO_REPOSITORY }}
+  TOWER_DATA_STUDIO_TEMPLATES_RSTUDIO_ICON: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_RSTUDIO_ICON }}
+  TOWER_DATA_STUDIO_TEMPLATES_VSCODE_REPOSITORY: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_REPOSITORY }}
+  TOWER_DATA_STUDIO_TEMPLATES_VSCODE_ICON: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_ICON }}
+
+  # https://stackoverflow.com/questions/66678097/does-javax-net-ssl-truststore-override-or-add-to-cacerts
+  # JAVA_OPTS: "-Djdk.tls.client.protocols=TLSv1.2 -Djavax.net.debug=all -Djavax.net.ssl.trustStore=/usr/lib/jvm/java-17-amazon-corretto/lib/security/cacerts"
+  # TLS details
+  # JAVA_OPTS: "-Djdk.tls.client.protocols=TLSv1.2 -Djavax.net.debug=all"
+  # SCM test
+  #TOWER_SCM_PROVIDERS_GITLAB_USER: "abc"
+  #TOWER_SCM_PROVIDERS_GITLAB_PASSWORD: "123"
+# ---
+# kind: ConfigMap
+# apiVersion: v1
+# metadata:
+#   name: {{ .Release.Name }}-data-studios-env
+#   labels:
+#     app: {{ .Release.Name }}-backend-cfg
+# data:
+#   data-studios.env: |
+#     PLATFORM_URL={{ .Values.config.TOWER_SERVER_URL }}
+
+#     CONNECT_HTTP_PORT={{ .Values.config.CONNECT_HTTP_PORT }}
+#     CONNECT_TUNNEL_URL={{ .Values.config.CONNECT_TUNNEL_URL }}
+#     CONNECT_PROXY_URL={{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL }}
+
+#     CONNECT_REDIS_ADDRESS={{ .Values.redis.TOWER_REDIS_URL }}
+#     CONNECT_REDIS_DB={{ .Values.redis.CONNECT_REDIS_DB }}
+#     CONNECT_OIDC_CLIENT_REGISTRATION_TOKEN={{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN }}
+
+#     CONNECT_SERVER_LOG_LEVEL=debug
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-tower-yml
+  labels:
+    app: {{ .Release.Name }}-backend-cfg
+data:
+  tower.yml: |
+    mail:
+      smtp:
+        # FIXME `auth` and `starttls` should be enabled
+        # with a production SMTP host
+        auth: false
+        starttls:
+          enable: false
+          required: false
+    micronaut:
+      config-client:
+        enabled: false
+      application:
+        name: tower-graham
+    tower:
+      admin:
+        root-users: "${TOWER_ROOT_USERS:[]}"
+      data-studio:
+        allowed-workspaces: null
+      limits:
+        max-orgs: 10
+        max-teams: 20
+        max-members: 50
+        max-workspaces: 50
+        max-workspace-participants: 50
+        max-workspace-pipelines: 100
+        max-workspace-datasets: 1000
+        max-dataset-versions: 100
+      scm:
+        providers:
+          # github:
+          #   user: <YOUR GITHUB USER NAME>
+          #   password: <YOUR GITHUB ACCESS TOKEN OR PASSWORD>
+          # gitlab:
+          #   user: <YOUR GITLAB USER NAME>
+          #   password: <YOUR GITLAB PASSWORD>
+          #   token: <YOUR GITLAB TOKEN>
+          # bitbucket:
+          #   user: <YOUR BITBUCKET USER NAME>
+          #   password: <YOUR BITBUCKET TOKEN OR PASSWORD>
+          privategitlab:
+            server: "https://csgitlab2.dev-seqera.net"
+            platform: "gitlab"
+            user: "graham_wright"
+            password: "grahamletmein!"
+            token: "glpat-tXXACsggdZbML6o1vjWQ"

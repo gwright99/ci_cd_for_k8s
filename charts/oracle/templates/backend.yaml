@@ -1,0 +1,117 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels:
+    app: {{ .Release.Name }}-backend
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-backend
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-backend
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.images.imagepullsecret | quote }}
+
+      initContainers:
+        - name: wait-for-redis
+          {{- with .Values.images.init.check_redis_available }}
+          image: {{ .fullimage | quote }}
+          imagePullPolicy: {{ .pullpolicy | quote }}
+          args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+          {{- end }}
+
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-tower-yml
+        - name: cert-volume
+          secret:
+            secretName: {{ .Values.config.TOWER_OIDC_PEM_SECRET_NAME }}
+  
+
+      containers:
+        - name: backend
+          {{- with .Values.images.backend.main }}
+          image: {{ printf "%s:%s" .image .tag }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-tower-backend-cfg
+          env:
+            - name: MICRONAUT_ENVIRONMENTS
+              value: "prod,redis,ha"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tower.yml
+              subPath: tower.yml
+            - name: cert-volume
+              mountPath: /data/certs/oidc.pem
+              subPath: tls.key
+             
+          resources:
+            requests:
+              cpu: {{ .Values.resources.backend.cpu.request | quote }}
+              memory: {{ .Values.resources.backend.memory.request | quote }}
+            limits:
+              memory: {{ .Values.resources.backend.memory.limit | quote }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 10
+          command: [ "/bin/sh" ]
+          # args: [ "-c", "keytool -printcert -rfc -sslserver csgitlab2.dev-seqera.net:443  >  /PRIVATE_CERT.pem && keytool -import -trustcacerts -cacerts -storepass changeit -noprompt -alias graham -file /PRIVATE_CERT.pem && ./tower.sh" ]
+          args:
+            - -c
+            - | 
+                keytool -printcert -rfc -sslserver csgitlab2.dev-seqera.net:443  >  /PRIVATE_CERT.pem; 
+                keytool -import -trustcacerts -cacerts -storepass changeit -noprompt -alias graham -file /PRIVATE_CERT.pem ; 
+                ./tower.sh
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels:
+    app: {{ .Release.Name }}-backend
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: {{ .Release.Name }}-backend
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-backend-api
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: {{ .Release.Name }}-backend

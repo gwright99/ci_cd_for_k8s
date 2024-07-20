@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: seqera-launcher-sa
+  namespace: seqera
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: seqera-launcher-role
+  namespace: seqera
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/status", "pods/log", "pods/exec", "persistentvolumeclaims", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "jobs/status", "jobs/log"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: seqera-launcher-rolebind
+  namespace: seqera
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: seqera-launcher-role
+subjects:
+  - kind: ServiceAccount
+    name: seqera-launcher-sa
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: seqera-launcher-userbind
+  namespace: seqera
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: seqera-launcher-role
+subjects:
+  - kind: User
+    name: seqera-launcher-user
