@@ -4,6 +4,7 @@ metadata:
   creationTimestamp: null
   labels:
     run: plainnginx
+    foo: bar
   name: plainnginx
   # namespace: default
   namespace: argocd
