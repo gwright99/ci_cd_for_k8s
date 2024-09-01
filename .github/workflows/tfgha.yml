@@ -11,12 +11,15 @@ defaults:
   run:
     shell: bash
     # working-directory: ./tfgha/aws
-    working-directory: tfgha/aws
+    # working-directory: tfgha/aws
 
 jobs:
   deployviatf:
     # runs-on: ubuntu-latest
     runs-on: arc-runner-set    # <-- Local K8s cluster
+    env:
+      TF_DIR: tfgha/aws
+
     steps:
         - name: Install dependencies
           run: |
@@ -52,6 +55,7 @@ jobs:
           run: |
             # cd tfgha/aws
             terraform init -input=false
+          working-directory: ${{ env.TF_DIR }}
 
         - name: Terraform validation
           run: terraform validate
