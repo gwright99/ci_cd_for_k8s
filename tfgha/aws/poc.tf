@@ -37,4 +37,7 @@ resource "aws_vpc" "vpc" {
     instance_tenancy = "default"
 }
 
-#
+# VPC ONLY requires following permissions:
+#  "ec2:CreateVpc",
+#  "ec2:CreateTags",
+#  "ec2:DescribeVpcAttribute"
