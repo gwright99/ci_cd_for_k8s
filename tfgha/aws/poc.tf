@@ -41,3 +41,4 @@ resource "aws_vpc" "vpc" {
 #  "ec2:CreateVpc",
 #  "ec2:CreateTags",
 #  "ec2:DescribeVpcAttribute"
+#
