@@ -10,7 +10,8 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ./tfgha/aws
+    # working-directory: ./tfgha/aws
+    working-directory: tfgha/aws
 
 jobs:
   deployviatf:
@@ -20,7 +21,7 @@ jobs:
         - name: Install dependencies
           run: |
             sudo apt update
-            sudo apt instally -y git --no-install-recommends
+            sudo apt install -y git --no-install-recommends
 
         - name: Checkout
           uses: actions/checkout@v4
