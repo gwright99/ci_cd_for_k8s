@@ -1,0 +1,53 @@
+name: TFGHA_DEPLOY_TO_AWS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - tfgha/aws/*
+
+jobs:
+  deployviatf:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            sparse-checkout: |
+              tfgha
+
+        - name: Configure Git
+          run: |
+            git config user.name "$GITHUB_ACTOR"
+            git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+        - name: Install Terraform
+          env:
+            TERRAFORM_VERSION: "1.6.4"
+          run:
+            tf_version=$TERRAFORM_VERSION
+            wget https://releases.hashicorp.com/terraform/"$tf_version"/terraform_"$tf_version"_linux_amd64.zip
+            unzip terraform_"$tf_version"_linux_amd64.zip
+            sudo mv terraform /usr/local/bin/
+
+        - name: Verify Terraform version
+          run: terraform --version
+
+        - name: Terraform init
+          env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          run: |
+            cd tfgha/aws
+            terraform init -input=false
+
+        - name: Terraform validation
+          run: terraform validate
+
+        - name: Terraform apply
+          env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          run: terraform apply -auto-approve -input=false
