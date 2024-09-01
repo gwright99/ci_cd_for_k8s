@@ -14,7 +14,8 @@ defaults:
 
 jobs:
   deployviatf:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: arc-runner-set    # <-- Local K8s cluster
     steps:
         - name: Checkout
           uses: actions/checkout@v4
