@@ -14,6 +14,7 @@ terraform {
   backend "local" {
     path = "DONTDELETE/terraform.tfstate"
   }
+}
 
 
 provider "aws" {
@@ -33,5 +34,7 @@ provider "aws" {
 # Build VPC
 resource "aws_vpc" "vpc" {
     cidr_block = "10.10.0.0/16"
-    instance_tenancy" = "default"
+    instance_tenancy = "default"
 }
+
+#
