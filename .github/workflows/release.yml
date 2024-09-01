@@ -20,8 +20,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Setting up sparse checkout
+          # /usr/bin/git sparse-checkout set charts/tower*
+          # Error: fatal: specify directories rather than patterns.  If your directory really has any of '*?[]\' in it, pass --skip-checks
           sparse-checkout: |
-            charts/tower*
+            charts/tower_24.1
 
       - name: Configure Git
         run: |
