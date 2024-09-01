@@ -26,11 +26,9 @@ jobs:
         - name: Install Terraform
           env:
             TERRAFORM_VERSION: "1.6.4"
-          run:
-            tf_version=$TERRAFORM_VERSION
-            wget https://releases.hashicorp.com/terraform/"$tf_version"/terraform_"$tf_version"_linux_amd64.zip
-            unzip terraform_"$tf_version"_linux_amd64.zip
-            sudo mv terraform /usr/local/bin/
+          uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: "$TERRAFORM_VERSION"
 
         - name: Verify Terraform version
           run: terraform --version
