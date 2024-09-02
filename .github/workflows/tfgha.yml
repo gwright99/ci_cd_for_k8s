@@ -38,17 +38,18 @@ jobs:
             git config user.name "$GITHUB_ACTOR"
             git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-        - name: Install NodeJS
-          uses: actions/setup-node@v2
-          with:
-            node-version: 16.13.1
+      # Installer Terraform into base image
+        # - name: Install NodeJS
+        #   uses: actions/setup-node@v2
+        #   with:
+        #     node-version: 16.13.1
 
-        - name: Install Terraform
-          env:
-            TERRAFORM_VERSION: "1.6.4"
-          uses: hashicorp/setup-terraform@v3
-          with:
-            terraform_version: "$TERRAFORM_VERSION"
+        # - name: Install Terraform
+        #   env:
+        #     TERRAFORM_VERSION: "1.6.4"
+        #   uses: hashicorp/setup-terraform@v3
+        #   with:
+        #     terraform_version: "$TERRAFORM_VERSION"
 
         - name: Verify Terraform version
           run: terraform --version
