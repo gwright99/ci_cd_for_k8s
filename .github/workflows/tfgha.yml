@@ -38,7 +38,11 @@ jobs:
             git config user.name "$GITHUB_ACTOR"
             git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      # Installer Terraform into base image
+        # Sept 2/24 Note:
+        # When using standard GHA image, I need to install Node and TF as part of the action.
+        # This was no longer once I generated a custom base image (with TF installed).
+        # See: https://github.com/orgs/community/discussions/58278
+
         # - name: Install NodeJS
         #   uses: actions/setup-node@v2
         #   with:

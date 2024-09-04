@@ -1,0 +1,47 @@
+# Source: https://github.com/some-natalie/kubernoodles/blob/main/.github/workflows/super-linter.yml
+# Config Reference: https://github.com/super-linter/super-linter?tab=readme-ov-file#configure-super-linter
+name: Lint_Stuff
+
+on:
+  push:
+    branches:
+      - lint
+    paths:
+      - yamlfiles/*
+  # Activate manual invocation option
+  workflow_dispatch: 
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint_yaml:
+    name: Lint Yaml Files
+    runs-on: arc-runner-set
+    env:
+      FOO: bar
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Lint Codebase YAML files
+        uses: super-linter/super-linter@v7
+        env:
+          # Will parse the entire repository and find all files to validate across all types. 
+          # NOTE: When false, only new or edited files will be parsed for validation.
+          VALIDATE_ALL_CODEBASE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # VALIDATE_BASH: true
+          # VALIDATE_DOCKERFILE_HADOLINT: true
+          # DOCKERFILE_HADOLINT_FILE_NAME: .hadolint.yaml
+          # VALIDATE_EDITORCONFIG: true
+          # VALIDATE_GITHUB_ACTIONS: true
+          VALIDATE_JSON: true
+          # VALIDATE_MARKDOWN: true
+          # MARKDOWN_CONFIG_FILE: .markdownlint.json
+          # VALIDATE_POWERSHELL: true
+          # VALIDATE_YAML: true
