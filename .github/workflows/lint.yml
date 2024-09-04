@@ -18,7 +18,7 @@ defaults:
 jobs:
   lint_yaml:
     name: Lint Yaml Files
-    runs-on: arc-runner-set
+    runs-on: ubuntu-latest    #arc-runner-set
     env:
       FOO: bar
 
