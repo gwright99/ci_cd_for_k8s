@@ -30,6 +30,7 @@ jobs:
 
       - name: Configure Git
         run: |
+          mkdir /github/home
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
