@@ -28,11 +28,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - name: Configure Git
-      #   run: |
-      #     mkdir /github/home
-      #     git config user.name "$GITHUB_ACTOR"
-      #     git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: Configure Git
+        run: |
+          mkdir /home/runner/_work/github/home
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Lint Codebase YAML files
         uses: super-linter/super-linter@v7
