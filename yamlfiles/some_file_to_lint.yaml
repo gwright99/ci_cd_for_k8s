@@ -1,3 +1,4 @@
 a:
     b: foo
-  c: wrong 
+  c: wrong
+  d: also_wrong
