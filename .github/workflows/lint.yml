@@ -59,6 +59,5 @@ jobs:
         with:
           # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswithargs
           entrypoint: /bin/bash
-          args: -c 'mkdir -p /github/home && \
-            ln -s /github/workspace/.github/linters/* /action/lib/.automation/ && \
+          args: -c 'mkdir -p /github/home && ln -s /github/workspace/.github/linters/* /action/lib/.automation/ && \
             /action/lib/linter.sh'
