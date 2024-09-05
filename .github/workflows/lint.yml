@@ -60,9 +60,9 @@ jobs:
           # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswithargs
           entrypoint: /bin/bash
           # Using && \ caused error on next lines. Trying YAML multiline (newlines replaced by spaces)
-          #  
+          # /action/lib/.automation already has default .hadolint, and custom files not copied over.
+          # fixing via forcing symlink to repo. (Another hack)
           args: > 
             -c 'mkdir -p /github/home && 
             ln -s -f /github/workspace/.github/linters/.[!.]* /action/lib/.automation/ &&
-            sleep 3600 && 
             /action/lib/linter.sh'
