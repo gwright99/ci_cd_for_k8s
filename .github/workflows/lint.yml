@@ -60,8 +60,9 @@ jobs:
           # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswithargs
           entrypoint: /bin/bash
           # Using && \ caused error on next lines. Trying YAML multiline (newlines replaced by spaces)
-          #             ln -s /github/workspace/.github/linters/.[!.]* /action/lib/.automation/ && 
+          #  
           args: > 
             -c 'mkdir -p /github/home && 
+            ln -s -f /github/workspace/.github/linters/.[!.]* /action/lib/.automation/ &&
             sleep 3600 && 
             /action/lib/linter.sh'
