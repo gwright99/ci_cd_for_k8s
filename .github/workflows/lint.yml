@@ -30,8 +30,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          GH_HOME=/home/runner/_work/github/home
-          mkdir -p $GH_HOME && chmod 777 $GH_HOME
+          # GH_HOME=/home/runner/_work/github/home
+          # mkdir -p $GH_HOME && chmod 777 $GH_HOME
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
