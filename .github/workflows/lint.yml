@@ -62,6 +62,6 @@ jobs:
           # Using && \ caused error on next lines. Trying YAML multiline (newlines replaced by spaces)
           args: > 
             -c 'mkdir -p /github/home && 
-            ln -s /github/workspace/.github/linters/* /action/lib/.automation/ && 
+            ln -s /github/workspace/.github/linters/.[!.]* /action/lib/.automation/ && 
             sleep 3600 && 
             /action/lib/linter.sh'
