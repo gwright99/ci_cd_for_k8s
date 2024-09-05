@@ -63,4 +63,5 @@ jobs:
           args: > 
             -c 'mkdir -p /github/home && 
             ln -s /github/workspace/.github/linters/* /action/lib/.automation/ && 
+            sleep 3600 && 
             /action/lib/linter.sh'
