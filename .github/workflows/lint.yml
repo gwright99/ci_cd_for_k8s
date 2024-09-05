@@ -38,7 +38,9 @@ jobs:
       - name: Lint Codebase YAML files
         uses: super-linter/super-linter@v7
         env:
-          LINTER_RULES_PATH: .github/linters
+          # 2024-09-05 13:52:28 [FATAL]     -> MARKDOWN_LINTER_RULES rules file (/action/lib/.automation/.markdownlint.json) doesn't exist. Terminating...
+          # LINTER_RULES_PATH: .github/linters
+          LINTER_RULES_PATH: /github/workspace/.github/linters
 
           # Will parse the entire repository and find all files to validate across all types. 
           # NOTE: When false, only new or edited files will be parsed for validation.
