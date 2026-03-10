@@ -14,8 +14,30 @@ the latest versions of the packages.  You can then run `helm search repo
 
 To install the <chart-name> chart:
 
+    helm search repo gwright99
     helm install my-<chart-name> <alias>/<chart-name>
 
 To uninstall the chart:
 
     helm delete my-<chart-name>
+
+## Installing MySQL As Pod
+```bash
+# In this folder
+k apply -f mysql-standalone.yaml
+
+# Verify access -- login
+k exec -it mysql8-0 -- /bin/bash
+mysql -u root -proot
+mysql -u tower -ptower tower
+mysql> SELECT CURRENT_USER();
+
+# Confirm tower user is empowered
+mysql> SHOW GRANTS FOR 'tower'@'%';
++--------------------------------------------------+
+| Grants for tower@%                               |
++--------------------------------------------------+
+| GRANT USAGE ON *.* TO `tower`@`%`                |
+| GRANT ALL PRIVILEGES ON `tower`.* TO `tower`@`%` |
++--------------------------------------------------+ 
+```

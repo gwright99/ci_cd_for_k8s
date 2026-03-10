@@ -1,0 +1,77 @@
+{{- if eq ( .Values.redis.enable) true }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-efs-data
+  namespace: graham
+  labels:
+    app: redis
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-graham
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  serviceName: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+
+      containers:
+        - image: {{ printf "%s:%s" .Values.redis.image .Values.redis.tag }}
+          name: redis
+          args:
+            - --appendonly yes
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - mountPath: "/data"
+              name: "vol-data"
+      
+      # https://devops.stackexchange.com/questions/13939/how-to-allow-a-non-root-user-to-write-to-a-mounted-efs-in-eks
+      # Was driven by the `chown '.'` error when switching from EBS to EFS. Seems to be tied to config of EFS-SC provisioner
+      # https://github.com/kubernetes-sigs/aws-efs-csi-driver/tree/master/examples/kubernetes/dynamic_provisioning
+      # https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/300
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1337
+        fsGroup: 1337
+
+      volumes:
+        - name: vol-data
+          persistentVolumeClaim:
+            claimName: redis-efs-data
+
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+{{- end }}

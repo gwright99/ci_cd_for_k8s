@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connect-proxy
+  labels:
+    app.kubernetes.io/component: tower-connect-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: tower-connect-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: tower-connect-proxy
+    spec:
+      imagePullSecrets:
+        - name: "{{ .Values.images.imagepullsecret | quote }}"
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+        - name: proxy
+          {{- with .Values.images.connect-proxy.main }}
+          image: {{ printf "%s:%s" .image .tag }}
+          {{- end }}
+          # command: ["caddy", "serve"]  # Removed
+          env:
+            - name: PLATFORM_URL
+              value: "{{ .Values.config.TOWER_SERVER_URL }}"
+            - name: CONNECT_HTTP_PORT
+              value: "{{ .Values.config.CONNECT_HTTP_PORT }}"
+            - name: CONNECT_REDIS_ADDRESS
+              value: "{{ .Values.config.TOWER_REDIS_URL }}"
+            - name: CONNECT_REDIS_PREFIX
+              value: "connect:session"
+            - name: CONNECT_REDIS_TLS_ENABLE
+              value: "{{ .Values.config.CONNECT_REDIS_TLS_ENABLE }}"
+            - name: CONNECT_REDIS_DB
+              value: "{{ .Values.config.CONNECT_REDIS_DB }}"
+            - name: CONNECT_PROXY_URL
+              # Claude says these number types or ok to be wrapped in quotes. I'm not convinced (but auto-formatter
+              # is messing up spacing if I dont wrap in doublequotes).
+              value: "{{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL }}"
+            - name: CONNECT_TUNNEL_URL
+              value: "{{ .Values.config.CONNECT_TUNNEL_URL }}"
+            - name: CONNECT_OIDC_CLIENT_REGISTRATION_TOKEN
+              value: "{{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN }}"
+            - name: LOCAL_CACHE_TTL
+              value: 2m
+          ports:
+            - containerPort: {{ .Values.config.CONNECT_HTTP_PORT }}  #80
+              name: proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: connect-proxy
+  labels:
+    app.kubernetes.io/component: tower-connect-proxy
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      name: connect-proxy
+      targetPort: proxy
+  selector:
+    app.kubernetes.io/component: tower-connect-proxy
