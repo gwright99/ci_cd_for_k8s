@@ -41,3 +41,5 @@ mysql> SHOW GRANTS FOR 'tower'@'%';
 | GRANT ALL PRIVILEGES ON `tower`.* TO `tower`@`%` |
 +--------------------------------------------------+ 
 ```
+
+NOTE (Mar 9/26): Adding text to fix a branch problem I didnt notice (made changes in gwright99/oracle instead of branching from main. oops)
