@@ -43,6 +43,8 @@ data:
 
   # Data studio stuff
   TOWER_DATA_STUDIO_CONNECT_URL: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL | quote }}
+  TOWER_DATA_STUDIO_CONNECT_SSH_ADDRESS: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_SSH_ADDRESS }}  # Current as of Mar 11/26 -- this MUST have an http(s):// prefix in order for the Platform modal to not show "null".
+  TOWER_DATA_STUDIO_CONNECT_SSH_PORT: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_SSH_PORT | quote }}
 
   TOWER_OIDC_PEM_PATH: {{ .Values.config.TOWER_OIDC_PEM_PATH | quote }}
   TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN: {{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN | quote }}
@@ -52,10 +54,43 @@ data:
   TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_TOOL: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_TOOL | quote }}
   TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_STATUS: {{ .Values.config.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_STATUS | quote }}
 
-  TOWER_DATA_STUDIO_CONNECT_SSH_ADDRESS: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_SSH_ADDRESS }}
-  TOWER_DATA_STUDIO_CONNECT_SSH_PORT: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_SSH_PORT | quote }}
+  # Reminder: These settings are related to and dependent on CONNECT_SSH_ENABLED (as of Mar 11/26 defined directly on the connect-proxy manifest env)
+  # - CONNECT_SSH_ENABLED must be true, AND 
+  # - TOWER_DATA_STUDIO_SSH_ALLOWED_WORKSPACES must be present, AND
+  # - TOWER_SSH_KEYS_MANAGEMENT_ENABLED must be true
   TOWER_DATA_STUDIO_SSH_ALLOWED_WORKSPACES: {{ .Values.config.TOWER_DATA_STUDIO_SSH_ALLOWED_WORKSPACES | quote }}
   TOWER_SSH_KEYS_MANAGEMENT_ENABLED: {{ .Values.config.TOWER_SSH_KEYS_MANAGEMENT_ENABLED | quote }}  # IF this is missing, no option in profile dropdown
+
+  # OOS Data Studio stuff (Legit but did not set)
+  # TOWER_DATA_STUDIO_CONNECT_SSH_KEY_FINGERPRINT: "Some SHA"
+  # CONNECT_SSH_KEY_PATH: "/secrets/ssh-key"
+
+  # # OOS Data Studio stuff (Wont work right now until refactor how connect manifest get envvars)
+  # # Connect-proxy
+  # PLATFORM_URL: {{ .Values.config.TOWER_SERVER_URL | quote }}
+  # CONNECT_HTTP_PORT: {{ .Values.config.CONNECT_HTTP_PORT | quote }}
+  # CONNECT_REDIS_ADDRESS: {{ .Values.config.TOWER_REDIS_URL | trimPrefix "redis://" | quote }}
+  # CONNECT_REDIS_PREFIX: "connect:session"
+  # CONNECT_REDIS_TLS_ENABLE: {{ .Values.config.CONNECT_REDIS_TLS_ENABLE | quote }}
+  # CONNECT_REDIS_DB: {{ .Values.config.CONNECT_REDIS_DB | quote }}
+  # CONNECT_PROXY_URL: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL | quote }}
+  # CONNECT_TUNNEL_URL: {{ .Values.config.CONNECT_TUNNEL_URL | quote }}
+  # CONNECT_OIDC_CLIENT_REGISTRATION_TOKEN: {{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN | quote }}
+  # LOCAL_CACHE_TTL: "2m"
+  # CONNECT_SSH_ENABLED: "true"
+  # CONNECT_SSH_ADDR: ":2222"
+
+  # # connect-server
+  # CONNECT_HOST_DOMAIN: "connect-server"
+  # CONNECT_TUNNEL_PORT: "7070"
+  # CONNECT_LISTENER_PORT: "7777"
+  # CONNECT_REDIS_ADDRESS: {{ .Values.config.TOWER_REDIS_URL | trimPrefix "redis://" | quote }}
+  # CONNECT_REDIS_PREFIX: "connect:session"
+  # CONNECT_REDIS_TLS_ENABLE: {{ .Values.config.CONNECT_REDIS_TLS_ENABLE | quote }}
+  # CONNECT_REDIS_DB: {{ .Values.config.CONNECT_REDIS_DB | quote }}
+  # CONNECT_SERVER_LOG_LEVEL: {{ .Values.config.CONNECT_SERVER_LOG_LEVEL }}
+
+
 
   # https://stackoverflow.com/questions/66678097/does-javax-net-ssl-truststore-override-or-add-to-cacerts
   # JAVA_OPTS: "-Djdk.tls.client.protocols=TLSv1.2 -Djavax.net.debug=all -Djavax.net.ssl.trustStore=/usr/lib/jvm/java-17-amazon-corretto/lib/security/cacerts"
