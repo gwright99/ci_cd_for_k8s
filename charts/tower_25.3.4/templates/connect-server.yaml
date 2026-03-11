@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/component: connect-server
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/component: connect-server
@@ -17,13 +17,13 @@ spec:
         app.kubernetes.io/component: connect-server
     spec:
       imagePullSecrets:
-        - name: "{{ .Values.images.imagepullsecret | quote }}"
+        - name: {{ .Values.images.imagepullsecret | quote }}
       nodeSelector:
         kubernetes.io/arch: amd64
       containers:
         - name: server
-          {{- with .Values.images.connect-server.main }}
-          image: {{ printf "%s:%s" .image .tag }}
+          {{- with .Values.images.connectserver.main }}
+          image: {{ printf "%s:%s" .image .tag | quote }}
           {{- end }}
           ports:
             - containerPort: 7070
@@ -38,7 +38,7 @@ spec:
             - name: CONNECT_LISTENER_PORT
               value: "7777"
             - name: CONNECT_REDIS_ADDRESS
-              value: "{{ .Values.config.TOWER_REDIS_URL }}"
+              value: {{ .Values.config.TOWER_REDIS_URL | trimPrefix "redis://" | quote }}
             - name: CONNECT_REDIS_PREFIX
               value: connect:session
             - name: CONNECT_REDIS_TLS_ENABLE
@@ -46,7 +46,7 @@ spec:
             - name: CONNECT_REDIS_DB
               value: "{{ .Values.config.CONNECT_REDIS_DB }}"
             - name: CONNECT_SERVER_LOG_LEVEL
-              value: "{{ .Values.redis.CONNECT_SERVER_LOG_LEVEL }}"
+              value: "{{ .Values.config.CONNECT_SERVER_LOG_LEVEL }}"
 ---
 apiVersion: v1
 kind: Service

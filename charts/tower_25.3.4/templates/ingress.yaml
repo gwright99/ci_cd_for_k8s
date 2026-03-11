@@ -13,10 +13,9 @@ metadata:
     alb.ingress.kubernetes.io/tags: CreatedBy=Graham, Environment=development
     alb.ingress.kubernetes.io/actions.response-404: >
           {"type":"fixed-response","fixedResponseConfig":{"contentType":"text/plain","statusCode":"404","messageBody":"404 Not found"}}
-    kubernetes.io/ingressClassName: alb
   name: {{ .Release.Name }}
-  namespace: graham
 spec:
+  ingressClassName: alb
   rules:
     - host: {{ .Values.ingress.HOST_URL }}
       http:
@@ -37,7 +36,7 @@ spec:
             pathType: ImplementationSpecific
 
     # Data Studio (flat)
-    - host: "*.{{ .Values.ingress.HOST_URL }}"
+    - host: "{{ .Values.ingress.CONNECT_URL }}"
       http:
         paths:
           - backend:
