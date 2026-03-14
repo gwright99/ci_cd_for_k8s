@@ -1,0 +1,69 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    # NOTES:
+    #
+    # 1) ALB annotations are heavily influenced by your environment and its controls.
+    #    For details on each setting, see: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/guide/ingress/annotations.md
+    #
+    #    For the purposes of this deployment, several annotations are enabled to explicitly define behaviour.
+    #    These decisions may be inappropriate for your environment and should be verified with your cloud
+    #    operations representatives.
+    #
+    # 2) The AWS Load Balancer Controller must place interfaces within targeted subnets. This can occur in at least 3 ways:
+    #
+    #    1) Pre-tagging specific subnets with a special key-value pair (see: https://repost.aws/knowledge-center/eks-vpc-subnet-discovery).
+    #    2) Specifying subnet IDs within this Ingress object (see commented annotation `alb.ingress.kubernetes.io/subnets`).
+    #    3) If no subnets are provied, using all subnets in which a worker node is deployed.
+
+    alb.ingress.kubernetes.io/actions.response-404: |
+      {"type":"fixed-response","fixedResponseConfig":{"contentType":"text/plain","statusCode":"404","messageBody":"404 Not found"}}
+    alb.ingress.kubernetes.io/actions.ssl-redirect:
+      '{"Type": "redirect", "RedirectConfig":
+      { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    # alb.ingress.kubernetes.io/certificate-arn: REPLACE_ME_CERTICATE_ARN
+    # alb.ingress.kubernetes.io/group.name: REPLACE_ME_GROUP_NAME
+    # alb.ingress.kubernetes.io/group.order: "102"
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    # alb.ingress.kubernetes.io/load-balancer-attributes: |-
+    #   idle_timeout.timeout_seconds=301, routing.http2.enabled=false
+    #   , deletion_protection.enabled=false
+    #   , routing.http.drop_invalid_header_fields.enabled=true
+    #   , access_logs.s3.enabled=false
+    # alb.ingress.kubernetes.io/load-balancer-name: REPLACE_ME_ALB_NAME
+    # alb.ingress.kubernetes.io/scheme: internal
+    # alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
+    # alb.ingress.kubernetes.io/ssl-redirect: "443"
+    # alb.ingress.kubernetes.io/tags: CreatedBy=Terraform
+    # # alb.ingress.kubernetes.io/subnets: subnet-1a1a1a1a1a1a1a1a1a,subnet-2b2b2b2b2b2b2b2b2b
+
+    alb.ingress.kubernetes.io/certificate-arn:
+      {{.Values.config.ingress.annotations.aws_certificate_arn | quote}}
+    alb.ingress.kubernetes.io/scheme:
+      {{.Values.config.ingress.annotations.scheme | quote}}
+    alb.ingress.kubernetes.io/ssl-policy:
+      {{.Values.config.ingress.annotations.ssl_policy | quote}}
+    alb.ingress.kubernetes.io/ssl-redirect:
+      {{.Values.config.ingress.annotations.ssl_redirect | quote}}
+    external-dns.alpha.kubernetes.io/hostname:
+      {{.Values.config.ingress.annotations.external_dns_hostname | quote}}
+
+  # finalizers:
+  # - group.ingress.k8s.aws/tower-dev
+  name: {{.Values.wave.app.ingress_name | quote}}
+  namespace: {{.Values.wave.app.namespace | quote}}
+spec:
+  ingressClassName: alb
+  rules:
+    - host: {{.Values.config.ingress.host_url | quote}}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{.Values.wave.app.svc_name | quote}}
+                port:
+                  number: 8090
+            path: /*
+            pathType: ImplementationSpecific

@@ -1,0 +1,198 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{.Values.wave.app.cm_name | quote}}
+  namespace: {{.Values.wave.app.namespace}}
+  labels:
+    app: {{.Values.wave.app.cm_name | quote}}
+data:
+  # Application config:
+  #  - https://github.com/seqeralabs/wave/blob/master/src/main/resources/application.yml
+  #  - https://github.com/seqeralabs/wave/blob/master/src/main/groovy/io/seqera/wave/configuration/BuildConfig.groovy
+  #  - https://github.com/seqeralabs/wave/blob/master/src/test/resources/application-test.yml (BUILD settings)
+
+  # repo:
+  # -----------
+  # The container registry repository where Wave pushes images it builds. When a user requests a
+  # container build, the resulting image is tagged and stored here. This is the "output destination" for
+  # all builds. Must be a repository you have push credentials for. NOTE! When nextflow config `wave.freeze = true`, this value can be overridden:
+  #
+  # Priority (top priority to least):
+  #   1. req.buildRepository      -- if the request specifies a custom repo
+  #   2. wave.build.public-repo   -- if freeze is enabled and a public repo is configured
+  #   3. wave.build.repo          -- fallback default
+
+  # cache
+  # -----------
+  # The registry repository (or S3 bucket path) used by BuildKit to store/retrieve build cache
+  # layers. This dramatically speeds up rebuilds by reusing previously built layers. When set to an S3
+  # path (e.g., s3://bucket/path), the related options cache-bucket-region and
+  # cache-bucket-upload-parallelism become relevant. If not configured, a warning is logged at startup
+  # (BuildConfig.groovy:183).
+
+  # public-repo
+  # -----------
+  # The registry where Wave publishes images that are meant to be publicly accessible (i.e.,
+  #  no authentication required to pull). Used when builds are intended for public distribution rather
+  # than private consumption. Optional; when not set, public builds aren't supported.
+
+  # workspace
+  # -----------
+  # The local filesystem directory where Wave writes Dockerfiles and build context files
+  # before handing them off to BuildKit or Singularity. Must exist and be writable. In the Kubernetes
+  # setup (application-local-k8s.yml), this path also maps to a volume mount so build pods can access the
+  # files.
+
+  # logs.enabled
+  # -----------
+  # Whether build log capture is turned on. When true, Wave stores build output
+  # (stdout/stderr from BuildKit/Singularity) so users can retrieve them later via the API (http://<wave-server>:9090/v1alpha1/builds/<buildId>/logs)
+
+  # logs.path
+  # -----------
+  # Where build logs are persisted. Accepts either a local filesystem path (e.g.,
+  # .wave-test/logs) or an S3 path (e.g., s3://bucket/logs). When using S3, Wave extracts the key prefix
+  # automatically via BucketTokenizer (BuildConfig.groovy:206-211). Logs are capped at logs.maxLength
+  # (default 100KB) when downloaded.
+
+  # locks.path
+  # -----------
+  # Where Conda lock files are stored. Same path format as logs.path (local or S3). Conda
+  # lock files are generated during container builds that include Conda/Mamba environments, and storing
+  # them allows reuse across builds to ensure reproducible dependency resolution.
+  config.yml: |
+    wave:
+      server:
+        url: {{.Values.config.app_urls.wave_url | quote}}
+      
+      # Build options: https://github.com/seqeralabs/wave/blob/master/docs/configuration.mdx
+      build:
+        enabled: true
+        repo : "651706780852.dkr.ecr.eu-west-1.amazonaws.com/wave/build/dev"
+        cache : "651706780852.dkr.ecr.eu-west-1.amazonaws.com/wave/build/cache"
+        # public-repo: DO NOT SET THIS. #
+
+        workspace: '/build/workspace'
+        logs:
+          enabled: true
+          path: ".wave-test/logs"
+        locks:
+          path: ".wave-test/conda-locks"
+
+        # Kubernetes configuration for wave-build
+        k8s:
+          dns:
+            servers:
+              - "1.1.1.1"
+              - "8.8.8.8"
+          namespace: {{.Values.wave.build.namespace | quote }}
+          storage:
+            mountPath: "/build"
+            # Is PVC used for anything other than build?? Maybe move under 'build' if no.
+            claimName: {{.Values.wave.app.pvc_name | quote}}
+          serviceAccount: {{.Values.wave.build.sa_name | quote}}
+          resources:
+            requests:
+              memory: {{.Values.wave.build.resources.ram.requests | quote }}
+              cpu: {{.Values.wave.build.resources.cpu.requests | quote }}
+            limits:
+              memory: {{.Values.wave.build.resources.ram.limits | quote }}
+              cpu: {{.Values.wave.build.resources.cpu.limits | quote }}
+          nodeSelector:
+            # this node selector binds the build pods to a separate cluster node group
+            linux/amd64: {{.Values.wave.build.node_selector_service_label.amd64 | quote }}
+            linux/arm64: {{.Values.wave.build.node_selector_service_label.arm64 | quote }}
+
+      # Mirror service configuration
+      mirror:
+        enabled: true
+
+      # Security scanning configuration
+      scan:
+        enabled: true
+        reports:
+          path: ".wave-test/scans"
+
+      db:
+        uri: {{.Values.config.db.url | quote }}
+        user: {{.Values.config.db.user | quote }}
+        password: {{.Values.config.db.password | quote }}
+
+    redis:
+      uri: {{.Values.config.redis.url | quote}}
+      # password: {{.Values.config.redis.password | quote}}
+      pool :
+        enabled : false
+      health:
+        enabled: false
+
+    tower:
+      endpoint:
+        url: {{.Values.config.platform_url | quote}}
+
+    # This might be interesting. Keep commented out for now
+    # registries:
+    #   default: docker.io
+    #   docker.io:
+    #     username: ${DOCKER_USER:test}
+    #     password: ${DOCKER_PAT:test}
+    #   quay.io:
+    #     username: ${QUAY_USER:test}
+    #     password: ${QUAY_PAT:test}
+    #   195996028523.dkr.ecr.eu-west-1.amazonaws.com:
+    #     username: ${AWS_ACCESS_KEY_ID:test}
+    #     password: ${AWS_SECRET_ACCESS_KEY:test}
+    #   public.ecr.aws:
+    #     username: ${AWS_ACCESS_KEY_ID:test}
+    #     password: ${AWS_SECRET_ACCESS_KEY:test}
+    #   wavetest.azurecr.io:
+    #     username: ${AZURECR_USER:test}
+    #     password: ${AZURECR_PAT:test}
+    #   europe-southwest1-docker.pkg.dev:
+    #     credentials : ${GOOGLECR_KEYS:test}
+    #   quay.io/test/public/repo:
+    #     username: 'foo'
+    #     password: 'bar'
+
+    micronaut:
+      # Executor configuration for handling concurrent requests
+      executors:
+        stream-executor:
+          type: FIXED
+          number-of-threads: 16
+      # Netty HTTP server configuration
+      netty:
+        event-loops:
+          default:
+            num-threads: 64
+          stream-pool:
+            executor: stream-executor
+      # HTTP client configuration
+      http:
+        services:
+          stream-client:
+            read-timeout: 30s
+            read-idle-timeout: 5m
+            event-loop-group: stream-pool
+        # Not sure this is necessary
+        client:
+          read-timeout: 90s
+          max-content-length: 20Mb
+        # Not sure if this is necessary
+        codec:
+          json:
+            additionalTypes:
+              - application/vnd.docker.distribution.manifest.list.v2+json
+
+    # Management endpoints configuration
+    loggers:
+      # Enable metrics for monitoring
+      metrics:
+        enabled: true
+      # Enable health checks
+      health:
+        enabled: true
+        disk-space:
+          enabled: false
+        jdbc:
+          enabled: false

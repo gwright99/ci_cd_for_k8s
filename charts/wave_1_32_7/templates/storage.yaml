@@ -1,0 +1,60 @@
+---
+# Assumption: Storage dynamically provisioned using AWS EFS CSI driver
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{.Values.wave.storage_class.name | quote}}
+provisioner: {{.Values.wave.storage_class.csi_provisioner | quote}}
+parameters:
+  provisioningMode: {{.Values.wave.storage_class.provisioning_mode | quote}}
+  fileSystemId: {{.Values.wave.storage_class.filesystem_id | quote}}
+  directoryPerms: "700"
+reclaimPolicy: Retain
+# ---
+# ASSUMPTION: DYNAMIC Provisioning in place -- don't need PVC
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: {{.Values.wave.app.pv_name | quote}}
+# spec:
+#   capacity:
+#     storage: {{.Values.wave.app.pvc_size | quote}}
+#   volumeMode: Filesystem
+#   accessModes:
+#     - ReadWriteMany
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: {{.Values.wave.storage_class.name | quote}}
+#   csi:
+#     driver: {{.Values.wave.storage_class.csi_provisioner | quote}}
+#     volumeHandle: {{.Values.wave.storage_class.csi_volume_handle | quote}}
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: wave-build-pv
+# spec:
+#   capacity:
+#     storage: {{.Values.wave.app.pvc_size | quote}}
+#   volumeMode: Filesystem
+#   accessModes:
+#     - ReadWriteMany
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: {{.Values.wave.storage_class.name | quote}}
+#   csi:
+#     driver: {{.Values.wave.storage_class.csi_provisioner | quote}}
+#     volumeHandle: {{.Values.wave.storage_class.csi_volume_handle | quote}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: {{.Values.wave.app.namespace | quote}}
+  name: {{.Values.wave.app.pvc_name | quote}}
+  labels:
+    app: {{.Values.wave.app.app_name | quote}}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{.Values.wave.app.pvc_size | quote}}
+  storageClassName: {{.Values.wave.storage_class.name | quote}}

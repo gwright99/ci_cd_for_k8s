@@ -1,0 +1,17 @@
+apiVersion: v2
+name: wave-1-32-7
+description: Helm Chart to install Wave
+version: "0.0.1"
+type: application
+appVersion: "1.32.7"
+maintainers:
+  - name: gwright99
+    email: graham.wright@seqera.io
+    url: https://github.com/gwright99/
+home: http://github.com/gwright99/
+keywords:
+  - cloudnative
+  - helm
+  - kubernetes
+  - Seqera Platform
+  - Wave
