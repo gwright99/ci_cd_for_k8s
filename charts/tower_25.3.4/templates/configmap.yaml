@@ -41,6 +41,9 @@ data:
   TOWER_OIDC_SECRET: {{ .Values.config.TOWER_OIDC_SECRET | quote}}
   TOWER_OIDC_ISSUER: {{ .Values.config.TOWER_OIDC_ISSUER | quote }}
 
+  # Data explorer
+  TOWER_DATA_EXPLORER_ENABLED: {{ .Values.config.TOWER_DATA_EXPLORER_ENABLED | quote }}
+  
   # Data studio stuff
   TOWER_DATA_STUDIO_CONNECT_URL: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL | quote }}
   TOWER_DATA_STUDIO_CONNECT_SSH_ADDRESS: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_SSH_ADDRESS }}  # Current as of Mar 11/26 -- this MUST have an http(s):// prefix in order for the Platform modal to not show "null".
