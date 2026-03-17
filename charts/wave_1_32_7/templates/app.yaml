@@ -1,0 +1,103 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.wave.app.deployment_name | quote}}
+  namespace: {{.Values.wave.app.namespace | quote}}
+  labels:
+    app: {{.Values.wave.app.app_name | quote}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Values.wave.app.app_name | quote}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.wave.app.app_name | quote}}
+    spec:
+      serviceAccountName: {{.Values.wave.app.sa_name | quote}}
+      imagePullSecrets:
+        - name: "cr.seqera.io"
+      # Pod Anti-Affinity Rules
+      # UNCOMMENT THE FOLLOWING SECTION TO ENABLE HIGH-AVAILABILITY SCHEDULING
+      # These rules help distribute pods across zones and nodes for better reliability.
+      # These rules may cause issues if the number of replicas is less than the number of nodes, resulting in pods becoming unschedulable.
+      # affinity:
+      #   podAntiAffinity:
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #       - podAffinityTerm:
+      #           labelSelector:
+      #             matchLabels:
+      #               app: wave-app
+      #           topologyKey: topology.kubernetes.io/zone
+      #         weight: 100
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       - labelSelector:
+      #           matchLabels:
+      #             app: wave-app
+      #         topologyKey: kubernetes.io/hostname
+      nodeSelector:
+        service: {{.Values.wave.app.node_selector_service_label | quote}}
+      containers:
+        - image: {{.Values.wave.image | quote}}
+          name: wave-app
+          ports:
+            - containerPort: 9090
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MICRONAUT_ENVIRONMENTS
+              # NOTE: Linked to mail configuration in `wave-configmap.yaml`. If using SES, you must add `aws-ses` to this value.
+              value: "mail,ec2,redis,postgres"
+          resources:
+            requests:
+              memory: {{.Values.wave.app.resources.ram.requests | quote}}
+            limits:
+              memory: {{.Values.wave.app.resources.ram.limits | quote}}
+          workingDir: "/work"
+          volumeMounts:
+            - name: vol-build
+              mountPath: "/efs/wave"
+            - name: wave-cfg
+              mountPath: /work/config.yml
+              subPath: "config.yml"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9090
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9090
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 10
+      volumes:
+        - name: vol-build
+          persistentVolumeClaim:
+            claimName: {{.Values.wave.filesystem.app.pvc_name | quote}}
+        - name: wave-cfg
+          configMap:
+            name: {{.Values.wave.app.cm_name | quote}}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.wave.app.svc_name | quote}}
+  namespace: {{.Values.wave.app.namespace | quote}}
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+spec:
+  ports:
+    - port: 8090
+      targetPort: 9090
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: {{.Values.wave.app.app_name | quote}}

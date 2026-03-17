@@ -5,13 +5,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: redis-efs-data
-  namespace: graham
   labels:
     app: redis
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: efs-graham
+  storageClassName: {{ .Values.redis.storageClassName }}
   resources:
     requests:
       storage: 5Gi

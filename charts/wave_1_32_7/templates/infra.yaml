@@ -1,0 +1,89 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{.Values.wave.app.namespace | quote}}
+  labels:
+    app: {{.Values.wave.app.app_name}}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{.Values.wave.build.namespace | quote}}
+  labels:
+    app: {{.Values.wave.app.app_name}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: {{.Values.wave.app.namespace | quote}}
+  name: {{.Values.wave.app.sa_name | quote}}
+  annotations:
+    kubernetes.io/service-account.name: {{.Values.wave.app.sa_name | quote}}
+type: kubernetes.io/service-account-token
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: {{.Values.wave.build.namespace | quote}}
+  name: {{.Values.wave.build.sa_name | quote}}
+  # annotations:
+  #   eks.amazonaws.com/role-arn:
+  #     {{.Values.wave.build.sa_aws_iam_role_arn | quote}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: {{.Values.wave.app.namespace | quote}}
+  name: {{.Values.wave.app.sa_name | quote}}
+  # annotations:
+  #   eks.amazonaws.com/role-arn: {{.Values.wave.app.sa_aws_iam_role_arn | quote}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "cr.seqera.io"
+  namespace: {{.Values.wave.app.namespace | quote}}
+type: kubernetes.io/dockerconfigjson
+data:
+  # Using dict/toJson means Helm properly JSON-escapes the robot$... username rather than doing raw string interpolation.
+  {{- $user := .Values.wave.imagepullsecret.harbor_user }}
+  {{- $pass := .Values.wave.imagepullsecret.harbor_password }}
+  {{- $auth := printf "%s:%s" $user $pass | b64enc }}
+  {{- $dockercfg := dict "auths" (dict "cr.seqera.io" (dict "username" $user "password" $pass "auth" $auth)) }}
+  .dockerconfigjson: {{ $dockercfg | toJson | b64enc | quote }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{.Values.wave.cluster.role_name | quote}}
+rules:
+  - apiGroups:
+      - "" # Core API group
+      - batch # Batch API group for jobs
+    resources:
+      - pods # Access to pod resources
+      - pods/status # Access to pod status
+      - pods/log # Access to pod logs
+      - pods/exec # Ability to execute commands in pods
+      - jobs # Access to job resources
+      - jobs/status # Access to job status
+    verbs:
+      - get # Permission to retrieve resources
+      - list # Permission to list resources
+      - watch # Permission to watch for changes
+      - create # Permission to create resources
+      - delete # Permission to delete resources
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{.Values.wave.cluster.role_name | quote}}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{.Values.wave.cluster.role_name | quote}}
+subjects:
+  - kind: ServiceAccount
+    name: {{.Values.wave.app.sa_name | quote}}
+    namespace: {{.Values.wave.app.namespace | quote}}

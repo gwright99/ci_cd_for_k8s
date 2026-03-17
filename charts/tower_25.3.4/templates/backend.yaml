@@ -41,7 +41,7 @@ spec:
       containers:
         - name: backend
           {{- with .Values.images.backend.main }}
-          image: {{ printf "%s:%s" .image .tag }}
+          image: {{ printf "%s:%s" .image .tag | quote }}
           {{- end }}
           envFrom:
             - configMapRef:
