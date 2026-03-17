@@ -80,7 +80,7 @@ spec:
       volumes:
         - name: vol-build
           persistentVolumeClaim:
-            claimName: {{.Values.wave.app.pvc_name | quote}}
+            claimName: {{.Values.wave.filesystem.app.pvc_name | quote}}
         - name: wave-cfg
           configMap:
             name: {{.Values.wave.app.cm_name | quote}}
