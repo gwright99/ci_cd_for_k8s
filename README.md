@@ -50,17 +50,30 @@ NOTE (Mar 9/26): Adding text to fix a branch problem I didnt notice (made change
 cd ~/Project/ci_cd_for_k8s
 
 # Dry run
+# =====================================================
 helm template tower25-3-4 ./charts/tower_25.3.4 -f values_tower_25_3_4.yaml -n graham
 
 # Real deployment
+# =====================================================
 helm install tower25-3-4 ./charts/tower_25.3.4 -f values_tower_25_3_4.yaml -n graham --create-namespace
+
 helm upgrade --install tower25-3-4 ./charts/tower_25.3.4 -f values_tower_25_3_4.yaml -n graham
 
+helm upgrade --install wave ./charts/wave_1_32_7/ -f values_wave_1_32_7.yaml
+
+
 # Uninstall
+# =====================================================
 helm uninstall tower25-3-4 -n graham
 helm uninstall tower25-3-4 -n graham --no-hooks  # If deployment failed midway
+
+helm uninstall wave -n graham --no-hooks
 
 # List
 helm list -A
 helm list -n <namespace>
+
+# Templated Output
+# =====================================================
+helm template ./charts/wave_1_32_7/ -f my_values.yaml > manifests_rendered.yaml
 ```

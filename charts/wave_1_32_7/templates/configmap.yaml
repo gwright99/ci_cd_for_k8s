@@ -7,6 +7,7 @@ metadata:
     app: {{.Values.wave.app.cm_name | quote}}
 data:
   # Application config:
+  #  - https://github.com/seqeralabs/wave/blob/master/docs/configuration.md#container-build-process
   #  - https://github.com/seqeralabs/wave/blob/master/src/main/resources/application.yml
   #  - https://github.com/seqeralabs/wave/blob/master/src/main/groovy/io/seqera/wave/configuration/BuildConfig.groovy
   #  - https://github.com/seqeralabs/wave/blob/master/src/test/resources/application-test.yml (BUILD settings)
@@ -68,9 +69,23 @@ data:
       # Build options: https://github.com/seqeralabs/wave/blob/master/docs/configuration.mdx
       build:
         enabled: true
-        repo : "651706780852.dkr.ecr.eu-west-1.amazonaws.com/wave/build/dev"
-        cache : "651706780852.dkr.ecr.eu-west-1.amazonaws.com/wave/build/cache"
+        repo : {{.Values.wave.build.repos.repo | quote}}
+        cache: {{.Values.wave.build.repos.cache | quote}}
         # public-repo: DO NOT SET THIS. #
+
+        # Cache stuff - DO NOT CHANGE
+        # WARNING: Cache is used to minimize costs incurred by calls to ECR.
+        # If you build a container and then delete it from the target ECR, calls to Wave for the now-deleted container
+        # will behave weirdly:
+        #  1. On any node where the image already exists (due to prior pull) Nextflow tasks that need to container will still work. 
+        #     This is because Wave returns a cache from the digest and the local container runtime matches it against the local container.
+        #  2. Nextflow Tasks on nodes that dont' have the image will fail -- Wave won't build the image due to the cache hit, but
+              the new nodes can pull the image since it was deleted from the target ECR. Users will need to find a way to change 
+              the container fingerprint or wait for the wave.build.status.duration to expire (at which point another build will occur
+              on the next build request to Wave).
+        skip-cache: false
+        status: 
+          duration: "90m"
 
         # workspace is where the container context will be populated.
         workspace: '/efs/wave/build'  # ROOT (without 'build' MUST BE SYNCED WITH storage.mountPath
@@ -105,8 +120,8 @@ data:
 
           nodeSelector:
             # this node selector binds the build pods to a separate cluster node group
-            linux/amd64: {{.Values.wave.build.node_selector_service_label.amd64 | quote }}
-            linux/arm64: {{.Values.wave.build.node_selector_service_label.arm64 | quote }}
+            linux/amd64: {{.Values.wave.build.node_selector_kv.amd64 | quote }}
+            # linux/arm64: {{.Values.wave.build.node_selector_kv.arm64 | quote }}
 
       # Mirror service configuration
       mirror:
@@ -117,7 +132,7 @@ data:
       scan:
         enabled: true
         reports:
-          path: "s3://651706780852-us-east-1/wave-reports/.wave-test/scans"  # TODO - parameterize this and talk to NATE
+          path: {{.Values.wave.build.s3.report_path | quote }}
 
       db:
         uri: {{.Values.config.db.url | quote }}
@@ -131,6 +146,22 @@ data:
         enabled : false
       health:
         enabled: false
+
+    mail:
+      from: {{.Values.config.mail.from | quote }}
+      {{- if not .Values.config.mail.use_ses_iam_role }}
+      smtp:
+        host: {{.Values.config.mail.smtp.host | quote }}
+        port: {{.Values.config.mail.smtp.port | quote }}
+        user: {{.Values.config.mail.smtp.user | quote }}
+        password: {{.Values.config.mail.smtp.password | quote }}
+        auth: {{.Values.config.mail.smtp.auth | quote }}
+        starttls:
+          enable: {{.Values.config.mail.smtp.starttls.enable | quote }}
+          required: {{.Values.config.mail.smtp.starttls.required | quote }}
+        ssl:
+          protocols: {{.Values.config.mail.smtp.ssl.protocols | quote }}
+      {{- end }}
 
     tower:
       endpoint:

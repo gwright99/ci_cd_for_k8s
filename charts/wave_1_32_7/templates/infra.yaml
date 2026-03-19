@@ -27,17 +27,12 @@ kind: ServiceAccount
 metadata:
   namespace: {{.Values.wave.build.namespace | quote}}
   name: {{.Values.wave.build.sa_name | quote}}
-  # annotations:
-  #   eks.amazonaws.com/role-arn:
-  #     {{.Values.wave.build.sa_aws_iam_role_arn | quote}}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   namespace: {{.Values.wave.app.namespace | quote}}
   name: {{.Values.wave.app.sa_name | quote}}
-  # annotations:
-  #   eks.amazonaws.com/role-arn: {{.Values.wave.app.sa_aws_iam_role_arn | quote}}
 ---
 apiVersion: v1
 kind: Secret

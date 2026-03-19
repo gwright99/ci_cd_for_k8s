@@ -38,7 +38,9 @@ spec:
       #             app: wave-app
       #         topologyKey: kubernetes.io/hostname
       nodeSelector:
-        service: {{.Values.wave.app.node_selector_service_label | quote}}
+        {{.Values.wave.app.node_selector_label_key}}:
+          {{.Values.wave.app.node_selector_label_value | quote}}
+        # service: {{.Values.wave.app.node_selector_service_label | quote}}
       containers:
         - image: {{.Values.wave.image | quote}}
           name: wave-app
@@ -50,8 +52,8 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: MICRONAUT_ENVIRONMENTS
-              # NOTE: Linked to mail configuration in `wave-configmap.yaml`. If using SES, you must add `aws-ses` to this value.
-              value: "mail,ec2,redis,postgres"
+              # NOTE: Linked to mail configuration in `wave-configmap.yaml`. If using SES, `aws-ses` is appended automatically.
+              value: "mail,ec2,redis,postgres{{- if .Values.config.mail.use_ses_iam_role }},aws-ses{{- end }}"
           resources:
             requests:
               memory: {{.Values.wave.app.resources.ram.requests | quote}}
