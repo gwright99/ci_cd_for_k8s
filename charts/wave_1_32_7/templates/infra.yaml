@@ -48,6 +48,9 @@ data:
   {{- $dockercfg := dict "auths" (dict "cr.seqera.io" (dict "username" $user "password" $pass "auth" $auth)) }}
   .dockerconfigjson: {{ $dockercfg | toJson | b64enc | quote }}
 ---
+# ClusterRole + RoleBinding pattern: the ClusterRole defines reusable permissions,
+# but the RoleBinding scopes them to wave-build only. This lets the SA in the wave
+# namespace manage pods/jobs in wave-build without cluster-wide access.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -70,10 +73,12 @@ rules:
       - create # Permission to create resources
       - delete # Permission to delete resources
 ---
+# Scoped RoleBinding: grants the ClusterRole permissions only within the build namespace.
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: {{.Values.wave.cluster.role_name | quote}}
+  namespace: {{.Values.wave.build.namespace | quote}}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -82,3 +87,18 @@ subjects:
   - kind: ServiceAccount
     name: {{.Values.wave.app.sa_name | quote}}
     namespace: {{.Values.wave.app.namespace | quote}}
+---
+# PREVIOUS: ClusterRoleBinding - granted permissions across ALL namespaces.
+# Replaced with namespace-scoped RoleBinding above.
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRoleBinding
+# metadata:
+#   name: {{.Values.wave.cluster.role_name | quote}}
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: ClusterRole
+#   name: {{.Values.wave.cluster.role_name | quote}}
+# subjects:
+#   - kind: ServiceAccount
+#     name: {{.Values.wave.app.sa_name | quote}}
+#     namespace: {{.Values.wave.app.namespace | quote}}

@@ -80,9 +80,9 @@ data:
         #  1. On any node where the image already exists (due to prior pull) Nextflow tasks that need to container will still work. 
         #     This is because Wave returns a cache from the digest and the local container runtime matches it against the local container.
         #  2. Nextflow Tasks on nodes that dont' have the image will fail -- Wave won't build the image due to the cache hit, but
-              the new nodes can pull the image since it was deleted from the target ECR. Users will need to find a way to change 
-              the container fingerprint or wait for the wave.build.status.duration to expire (at which point another build will occur
-              on the next build request to Wave).
+        #     the new nodes can pull the image since it was deleted from the target ECR. Users will need to find a way to change 
+        #     the container fingerprint or wait for the wave.build.status.duration to expire (at which point another build will occur
+        #     on the next build request to Wave).
         skip-cache: false
         status: 
           duration: "90m"
