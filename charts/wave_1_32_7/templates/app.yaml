@@ -54,6 +54,29 @@ spec:
             - name: MICRONAUT_ENVIRONMENTS
               # NOTE: Linked to mail configuration in `wave-configmap.yaml`. If using SES, `aws-ses` is appended automatically.
               value: "mail,ec2,redis,postgres{{- if .Values.config.mail.use_ses_iam_role }},aws-ses{{- end }}"
+            # Secrets: sourced from wave-secrets (see templates/secrets.yaml)
+            - name: WAVE_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "wave-secrets"
+                  key: WAVE_DB_USER
+            - name: WAVE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "wave-secrets"
+                  key: WAVE_DB_PASSWORD
+{{- if not .Values.config.mail.use_ses_iam_role }}
+            - name: MAIL_SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "wave-secrets"
+                  key: MAIL_SMTP_USER
+            - name: MAIL_SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "wave-secrets"
+                  key: MAIL_SMTP_PASSWORD
+{{- end }}
           resources:
             requests:
               memory: {{.Values.wave.app.resources.ram.requests | quote}}

@@ -14,15 +14,6 @@ metadata:
     app: {{.Values.wave.app.app_name}}
 ---
 apiVersion: v1
-kind: Secret
-metadata:
-  namespace: {{.Values.wave.app.namespace | quote}}
-  name: {{.Values.wave.app.sa_name | quote}}
-  annotations:
-    kubernetes.io/service-account.name: {{.Values.wave.app.sa_name | quote}}
-type: kubernetes.io/service-account-token
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   namespace: {{.Values.wave.build.namespace | quote}}

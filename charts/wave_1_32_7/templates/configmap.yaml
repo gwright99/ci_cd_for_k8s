@@ -136,8 +136,8 @@ data:
 
       db:
         uri: {{.Values.config.db.url | quote }}
-        user: {{.Values.config.db.user | quote }}
-        password: {{.Values.config.db.password | quote }}
+        # user:     ## See Secret -- WAVE_DB_USER
+        # password: ## See Secret -- WAVE_DB_PASSWORD
 
     redis:
       uri: {{.Values.config.redis.url | quote}}
@@ -153,8 +153,8 @@ data:
       smtp:
         host: {{.Values.config.mail.smtp.host | quote }}
         port: {{.Values.config.mail.smtp.port | quote }}
-        user: {{.Values.config.mail.smtp.user | quote }}
-        password: {{.Values.config.mail.smtp.password | quote }}
+        # user:     ## See Secret -- MAIL_SMTP_USER
+        # password: ## See Secret -- MAIL_SMTP_PASSWORD
         auth: {{.Values.config.mail.smtp.auth | quote }}
         starttls:
           enable: {{.Values.config.mail.smtp.starttls.enable | quote }}
