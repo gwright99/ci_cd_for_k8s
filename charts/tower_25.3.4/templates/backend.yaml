@@ -115,6 +115,30 @@ spec:
     - port: 8080
       targetPort: 8080
       protocol: TCP
+  {{- if eq .Values.cloud.target "aws" }}
   type: NodePort
+  {{- else if eq .Values.cloud.target "gcp" }}
+  type: ClusterIP
+  {{- end }}
   selector:
     app: {{ .Release.Name }}-backend
+
+
+---
+{{- if eq .Values.cloud.target "gcp" }}
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ .Release.Name }}-backend-healthcheck
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: 8080
+        requestPath: /health
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ .Release.Name }}-backend-api
+{{- end }}

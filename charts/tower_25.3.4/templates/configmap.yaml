@@ -23,11 +23,17 @@ data:
   TOWER_DB_MAX_LIFETIME: "180000"
   FLYWAY_LOCATIONS: "classpath:db-schema/mysql"
 
+  {{- if eq .Values.cloud.target "aws" }}
   TOWER_ENABLE_AWS_SES: "true"
+  {{- else if eq .Values.cloud.target "gcp" }}
+  TOWER_ENABLE_AWS_SES: "false"
+  {{- end }}
+
   TOWER_SMTP_HOST:      {{ .Values.config.TOWER_SMTP_HOST | quote }}
   TOWER_SMTP_PORT:      {{ .Values.config.TOWER_SMTP_PORT | quote }}
   TOWER_SMTP_USER:      {{ .Values.config.TOWER_SMTP_USER | quote }}
   TOWER_SMTP_PASSWORD:  {{ .Values.config.TOWER_SMTP_PASSWORD | quote }}
+  AWS_REGION: "us-east-1"
 
   TOWER_ENABLE_WAVE:  {{ .Values.config.TOWER_ENABLE_WAVE | quote }}
   WAVE_SERVER_URL:  {{ .Values.config.WAVE_SERVER_URL | quote }}

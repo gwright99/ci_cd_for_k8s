@@ -1,6 +1,8 @@
 {{- if eq ( .Values.redis.enable) true }}
 
+{{- if eq .Values.cloud.target "aws" }}
 ---
+# Dynamically create PVC in AWS. Use pre-existing in GCP.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -14,6 +16,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
+{{- end }}
 
 ---
 apiVersion: apps/v1
@@ -49,14 +52,26 @@ spec:
       # https://github.com/kubernetes-sigs/aws-efs-csi-driver/tree/master/examples/kubernetes/dynamic_provisioning
       # https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/300
       securityContext:
+        {{- if eq .Values.cloud.target "aws" }}
         runAsUser: 1000
         runAsGroup: 1337
         fsGroup: 1337
+        {{- else if eq .Values.cloud.target "gcp" }}
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        {{- end }}
 
       volumes:
+        {{- if eq .Values.cloud.target "aws" }}
         - name: vol-data
           persistentVolumeClaim:
             claimName: redis-efs-data
+        {{- else if eq .Values.cloud.target "gcp" }}
+        - name: vol-data
+          persistentVolumeClaim:
+            claimName: nfs-shared
+        {{- end }}
 
       restartPolicy: Always
 
