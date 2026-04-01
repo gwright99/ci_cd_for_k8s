@@ -2,13 +2,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-backend
+  name: backend-{{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}-backend
+    app: backend-{{ .Release.Name }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-backend
+      app: backend-{{ .Release.Name }}
   strategy:
     rollingUpdate:
       maxUnavailable: 0
@@ -16,36 +16,30 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-backend
+        app: backend-{{ .Release.Name }}
     spec:
       imagePullSecrets:
         - name: {{ .Values.images.imagepullsecret | quote }}
 
       initContainers:
         - name: wait-for-redis
-          {{- with .Values.images.init.check_redis_available }}
-          image: {{ .fullimage | quote }}
-          imagePullPolicy: {{ .pullpolicy | quote }}
+          image: {{ .Values.images.init.check_redis_available.image | quote }}
           args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
-          {{- end }}
 
       volumes:
         - name: config-volume
           configMap:
-            name: {{ .Release.Name }}-tower-yml
+            name: tower-yml-{{ .Release.Name }}
         - name: cert-volume
           secret:
-            secretName: {{ .Values.config.TOWER_OIDC_PEM_SECRET_NAME }}
+            secretName: {{ .Values.cm.platform.tower_oidc_pem_secret_name }}
   
-
       containers:
         - name: backend
-          {{- with .Values.images.backend.main }}
-          image: {{ printf "%s:%s" .image .tag | quote }}
-          {{- end }}
+          image: {{ .Values.images.backend.main.image | quote }}
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-tower-backend-cfg
+                name: tower-backend-cfg-{{ .Release.Name }}
           env:
             - name: MICRONAUT_ENVIRONMENTS
               value: "prod,redis,ha"
@@ -94,51 +88,27 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-backend
+  name: backend-{{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}-backend
+    app: backend-{{ .Release.Name }}
 spec:
   ports:
     - name: http
       port: 8080
       targetPort: 8080
   selector:
-    app: {{ .Release.Name }}-backend
+    app: backend-{{ .Release.Name }}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-backend-api
+  name: backend-api-{{ .Release.Name }}
 spec:
   ports:
     - port: 8080
       targetPort: 8080
       protocol: TCP
-  {{- if eq .Values.cloud.target "aws" }}
   type: NodePort
-  {{- else if eq .Values.cloud.target "gcp" }}
-  type: ClusterIP
-  {{- end }}
   selector:
-    app: {{ .Release.Name }}-backend
-
-
----
-{{- if eq .Values.cloud.target "gcp" }}
-apiVersion: networking.gke.io/v1
-kind: HealthCheckPolicy
-metadata:
-  name: {{ .Release.Name }}-backend-healthcheck
-spec:
-  default:
-    config:
-      type: HTTP
-      httpHealthCheck:
-        port: 8080
-        requestPath: /health
-  targetRef:
-    group: ""
-    kind: Service
-    name: {{ .Release.Name }}-backend-api
-{{- end }}
+    app: backend-{{ .Release.Name }}

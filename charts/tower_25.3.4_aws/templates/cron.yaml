@@ -2,58 +2,48 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-cron
+  name: cron-{{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}-cron
+    app: cron-{{ .Release.Name }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-cron
+      app: cron-{{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-cron
+        app: cron-{{ .Release.Name }}
     spec:
-# {{/*- include "ktower.imagepullsecret" . | indent 6 */}}
       imagePullSecrets:
         - name: {{ .Values.images.imagepullsecret | quote }}
 
       volumes:
         - name: config-volume
           configMap:
-            name: {{ .Release.Name }}-tower-yml
+            name: tower-yml-{{ .Release.Name }}
         - name: cert-volume
           secret:
-            secretName: {{ .Values.config.TOWER_OIDC_PEM_SECRET_NAME }}
+            secretName: {{ .Values.cm.platform.tower_oidc_pem_secret_name }}
 
       initContainers:
         - name: 01-migrate-db
-          {{-  with .Values.images.cron.main }}
-          image: {{ printf "%s:%s" .migration_image .tag | quote }}
-          imagePullPolicy: {{ .pullpolicy | quote }}
-          {{- end }}
+          image: {{ .Values.images.cron.init.migration_image | quote }}
           command: ["sh", "-c", "/migrate-db.sh"]
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-tower-backend-cfg
+                name: tower-backend-cfg-{{ .Release.Name }}
           volumeMounts:
             - name: config-volume
               mountPath: /tower.yml
               subPath: tower.yml
 
         - name: 02-wait-for-redis
-          {{- with .Values.images.init.check_redis_available }}
-          image: {{ printf "%s:%s" .image .tag | quote}}
-          imagePullPolicy: {{ .pullpolicy | quote }}
-          {{- end }}
+          image: {{ .Values.images.init.check_redis_available.image | quote}}
           #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "..."; ' ]
           args: [ 'sh', '-c', 'until redis-cli  -h redis -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
 
         - name: 03-wait-for-ingress
-          {{- with .Values.images.init.check_ingress_available }}
-          image: {{ printf "%s:%s" .image .tag | quote}}
-          imagePullPolicy: {{ .pullpolicy | quote }}
-          {{- end }}
+          image: {{ .Values.images.init.check_ingress_available.image | quote}}
           #args: [ 'sh', '-c', 'until redis-cli  -h redis.default.svc.cluster.local -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
           # args: [ 'sh', '-c', "while [[ \"$(curl https://gw.dev-tower.net -s -o /dev/null -L -w ''%{http_code}'' ${0})\" != \"200\" ]]; do echo 'sleep 2'; sleep 2; done; echo \"I made it out of the loop\";" ]
           # Tried curling ingress, not working. Now just doing plain sleep.
@@ -61,13 +51,10 @@ spec:
 
       containers:
         - name: backend
-          {{- with .Values.images.cron.main }}
-          image: {{ printf "%s:%s" .image .tag | quote }}
-          imagePullPolicy: {{ .pullpolicy | quote }}
-          {{- end }}
+          image: {{ .Values.images.cron.main.image | quote }}
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-tower-backend-cfg
+                name: tower-backend-cfg-{{ .Release.Name }}
           volumeMounts:
             - name: config-volume
               mountPath: /tower.yml

@@ -22,31 +22,29 @@ spec:
         kubernetes.io/arch: amd64
       containers:
         - name: server
-          {{- with .Values.images.connectserver.main }}
-          image: {{ printf "%s:%s" .image .tag | quote }}
-          {{- end }}
+          image: {{ .Values.images.connectserver.main.image | quote }}
           ports:
-            - containerPort: 7070
+            - containerPort: {{.Values.config.connect.CONNECT_TUNNEL_PORT }}
               name: server
-            - containerPort: 7777
+            - containerPort: {{ .Values.config.connect.CONNECT_LISTENER_PORT }}
               name: entrypoint
           env:
             - name: CONNECT_HOST_DOMAIN
-              value: connect-server
+              value: {{ .Values.config.connect.CONNECT_HOST_DOMAIN | quote }}
             - name: CONNECT_TUNNEL_PORT
-              value: "7070"
+              value: {{ .Values.config.connect.CONNECT_TUNNEL_PORT | quote }}
             - name: CONNECT_LISTENER_PORT
-              value: "7777"
+              value: {{ .Values.config.connect.CONNECT_LISTENER_PORT | quote }}
             - name: CONNECT_REDIS_ADDRESS
-              value: {{ .Values.config.TOWER_REDIS_URL | trimPrefix "redis://" | quote }}
+              value: {{ printf "%s:%s" .Values.cm.platform.redis_host .Values.cm.platform.redis_port | quote }}
             - name: CONNECT_REDIS_PREFIX
-              value: connect:session
+              value: "connect:session"
             - name: CONNECT_REDIS_TLS_ENABLE
-              value: "{{ .Values.config.CONNECT_REDIS_TLS_ENABLE }}"
+              value: {{ .Values.config.connect.CONNECT_REDIS_TLS_ENABLE | quote }}
             - name: CONNECT_REDIS_DB
-              value: "{{ .Values.config.CONNECT_REDIS_DB }}"
+              value: {{ .Values.config.connect.CONNECT_REDIS_DB | quote }}
             - name: CONNECT_SERVER_LOG_LEVEL
-              value: "{{ .Values.config.CONNECT_SERVER_LOG_LEVEL }}"
+              value: {{ .Values.config.connect.CONNECT_SERVER_LOG_LEVEL | quote }}
 ---
 apiVersion: v1
 kind: Service
@@ -58,11 +56,11 @@ spec:
   type: ClusterIP
   clusterIP: None
   ports:
-    # dont 100% recall why this is the way that it is
-    - port: 8080
+    - port: {{ .Values.config.connect.server_service_port }}
       targetPort: server
       name: server
-    - port: 7777
+
+    - port: {{ .Values.config.connect.CONNECT_LISTENER_PORT }}
       targetPort: entrypoint
       name: entrypoint
   selector:

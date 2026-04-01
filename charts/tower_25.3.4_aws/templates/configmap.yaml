@@ -1,0 +1,140 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: tower-backend-cfg-{{ .Release.Name }}
+  labels:
+    app: backend-cfg-{{ .Release.Name }}
+data:
+  TOWER_SERVER_URL:        {{ .Values.cm.platform.TOWER_SERVER_URL | quote }}
+  TOWER_CONTACT_EMAIL:     {{ .Values.cm.platform.TOWER_CONTACT_EMAIL | quote }}
+  TOWER_JWT_SECRET:        {{ .Values.cm.platform.TOWER_JWT_SECRET | quote }}
+  TOWER_CRYPTO_SECRETKEY:  {{ .Values.cm.platform.TOWER_CRYPTO_SECRETKEY | quote }}
+  TOWER_LICENSE:           {{ .Values.cm.platform.TOWER_LICENSE | quote }}
+  TOWER_ENABLE_PLATFORMS:  {{ .Values.cm.platform.TOWER_ENABLE_PLATFORMS | quote }}
+
+  # DB STUFF
+  TOWER_DB_URL:           {{ printf "jdbc:mysql://%s/%s?%s" .Values.cm.platform.db_host .Values.cm.platform.db_name .Values.cm.platform.db_connection_string | quote }}
+  TOWER_DB_DRIVER:        "org.mariadb.jdbc.Driver"
+  TOWER_DB_DIALECT:       "io.seqera.util.MySQL55DialectCollateBin"
+  TOWER_DB_MIN_POOL_SIZE: "2"
+  TOWER_DB_MAX_POOL_SIZE: "10"
+  TOWER_DB_MAX_LIFETIME:  "180000"
+  FLYWAY_LOCATIONS:       "classpath:db-schema/mysql"
+  TOWER_DB_USER:          {{ .Values.cm.platform.TOWER_DB_USER | quote }}
+  TOWER_DB_PASSWORD:      {{ .Values.cm.platform.TOWER_DB_PASSWORD | quote }}
+
+  # REDIS STUFF
+  TOWER_REDIS_URL:        {{ printf "%s://%s:%s" .Values.cm.platform.redis_protocol .Values.cm.platform.redis_host .Values.cm.platform.redis_port | quote }}
+
+  # SMTP STUFF
+  TOWER_ENABLE_AWS_SES:   {{ .Values.cm.platform.TOWER_ENABLE_AWS_SES | quote }}
+  AWS_REGION:             {{ .Values.cm.platform.AWS_REGION | quote }}
+  TOWER_SMTP_HOST:        {{ .Values.cm.platform.TOWER_SMTP_HOST | quote }}
+  TOWER_SMTP_PORT:        {{ .Values.cm.platform.TOWER_SMTP_PORT | quote }}
+  TOWER_SMTP_USER:        {{ .Values.cm.platform.TOWER_SMTP_USER | quote }}
+  TOWER_SMTP_PASSWORD:    {{ .Values.cm.platform.TOWER_SMTP_PASSWORD | quote }}
+
+  # OIDC STUFF  
+  TOWER_OIDC_CLIENT:      {{ .Values.cm.platform.TOWER_OIDC_CLIENT | quote }}
+  TOWER_OIDC_SECRET:      {{ .Values.cm.platform.TOWER_OIDC_SECRET | quote}}
+  TOWER_OIDC_ISSUER:      {{ .Values.cm.platform.TOWER_OIDC_ISSUER | quote }}
+
+  # WAVE STUFF
+  TOWER_ENABLE_WAVE:      {{ .Values.cm.platform.TOWER_ENABLE_WAVE | quote }}
+  WAVE_SERVER_URL:        {{ .Values.cm.platform.WAVE_SERVER_URL | quote }}
+
+  # DATA EXPLORER STUFF
+  TOWER_DATA_EXPLORER_ENABLED: {{ .Values.cm.platform.TOWER_DATA_EXPLORER_ENABLED | quote }}
+  
+  # DATA STUDIO STUFF
+  TOWER_DATA_STUDIO_CONNECT_URL: {{ .Values.cm.platform.TOWER_DATA_STUDIO_CONNECT_URL | quote }}
+  TOWER_DATA_STUDIO_CONNECT_SSH_ADDRESS: {{ .Values.cm.platform.TOWER_DATA_STUDIO_CONNECT_SSH_ADDRESS | quote }}  # Current as of Mar 11/26 -- this MUST have an http(s):// prefix in order for the Platform modal to not show "null".
+  TOWER_DATA_STUDIO_CONNECT_SSH_PORT: {{ .Values.cm.platform.TOWER_DATA_STUDIO_CONNECT_SSH_PORT | quote }}
+
+  TOWER_OIDC_PEM_PATH: {{ .Values.cm.platform.TOWER_OIDC_PEM_PATH | quote }}
+  TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN: {{ .Values.cm.platform.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN | quote }}
+
+  TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_ICON: {{ .Values.cm.platform.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_ICON | quote }}
+  TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_REPOSITORY: {{ .Values.cm.platform.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_REPOSITORY | quote }}
+  TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_TOOL: {{ .Values.cm.platform.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_TOOL | quote }}
+  TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_STATUS: {{ .Values.cm.platform.TOWER_DATA_STUDIO_TEMPLATES_VSCODE_1_101_2_0_9_0_STATUS | quote }}
+
+  # Reminder: These settings are related to and dependent on CONNECT_SSH_ENABLED (as of Mar 11/26 defined directly on the connect-proxy manifest env)
+  # - CONNECT_SSH_ENABLED must be true, AND 
+  # - TOWER_DATA_STUDIO_SSH_ALLOWED_WORKSPACES must be present, AND
+  # - TOWER_SSH_KEYS_MANAGEMENT_ENABLED must be true
+  TOWER_DATA_STUDIO_SSH_ALLOWED_WORKSPACES: {{ .Values.cm.platform.TOWER_DATA_STUDIO_SSH_ALLOWED_WORKSPACES | quote }}
+  TOWER_SSH_KEYS_MANAGEMENT_ENABLED: {{ .Values.cm.platform.TOWER_SSH_KEYS_MANAGEMENT_ENABLED | quote }}  # IF this is missing, no option in profile dropdown
+
+  TOWER_LOG_LEVEL: {{ .Values.cm.platform.TOWER_LOG_LEVEL | quote }}
+  TOWER_SSH_LOGLEVEL: {{ .Values.cm.platform.TOWER_SSH_LOGLEVEL | quote }}
+  TOWER_SECURITY_LOGLEVEL: {{ .Values.cm.platform.TOWER_SECURITY_LOGLEVEL | quote }}
+  TOWER_ROOT_USERS: {{ .Values.cm.platform.TOWER_ROOT_USERS | quote }}
+
+  # OOS Data Studio stuff (Legit but did not set)
+  # TOWER_DATA_STUDIO_CONNECT_SSH_KEY_FINGERPRINT: "Some SHA"
+  # CONNECT_SSH_KEY_PATH: "/secrets/ssh-key"
+
+  # https://stackoverflow.com/questions/66678097/does-javax-net-ssl-truststore-override-or-add-to-cacerts
+  # JAVA_OPTS: "-Djdk.tls.client.protocols=TLSv1.2 -Djavax.net.debug=all -Djavax.net.ssl.trustStore=/usr/lib/jvm/java-17-amazon-corretto/lib/security/cacerts"
+  # TLS details
+  # JAVA_OPTS: "-Djdk.tls.client.protocols=TLSv1.2 -Djavax.net.debug=all"
+  # SCM test
+  #TOWER_SCM_PROVIDERS_GITLAB_USER: "abc"
+  #TOWER_SCM_PROVIDERS_GITLAB_PASSWORD: "123"
+
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: tower-yml-{{ .Release.Name }}
+  labels:
+    app: backend-cfg-{{ .Release.Name }}
+data:
+  tower.yml: |
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+          required: true
+    micronaut:
+      application:
+        name: {{ .Values.cm.toweryml.application_name | quote }}
+    tower:
+      admin:
+        root-users: "${TOWER_ROOT_USERS:[]}"
+      data-studio:
+        allowed-workspaces: null
+      # limits:
+      #   max-orgs: 10
+      #   max-teams: 20
+      #   max-members: 50
+      #   max-workspaces: 50
+      #   max-workspace-participants: 50
+      #   max-workspace-pipelines: 100
+      #   max-workspace-datasets: 1000
+      #   max-dataset-versions: 100
+      scm:
+        providers:
+          # github:
+          #   user: <YOUR GITHUB USER NAME>
+          #   password: <YOUR GITHUB ACCESS TOKEN OR PASSWORD>
+          # gitlab:
+          #   user: <YOUR GITLAB USER NAME>
+          #   password: <YOUR GITLAB PASSWORD>
+          #   token: <YOUR GITLAB TOKEN>
+          # bitbucket:
+          #   user: <YOUR BITBUCKET USER NAME>
+          #   password: <YOUR BITBUCKET TOKEN OR PASSWORD>
+          # NOTE: Yes, I know these leaked, but not a huge deal since this project isnt deployed
+          # (and I already leaked this in earlier charts).
+          # TODO: Update source project. 
+          # privategitlab:
+          #   server: "https://csgitlab2.dev-seqera.net"
+          #   platform: "gitlab"
+          #   user: "graham_wright"
+          #   password: "grahamletmein!"
+          #   token: "glpat-tXXACsggdZbML6o1vjWQ"

@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-{{ .Release.Name }}
+  labels:
+    app: frontend-{{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-{{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: frontend-{{ .Release.Name }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.images.imagepullsecret | quote }}
+      containers:
+        - name: frontend
+          image: {{ .Values.images.frontend.main.image | quote }}
+          command: [ "/bin/sh" ]
+          args: [ "-c", "sed -i \"s/backend:8080/${NGINX_HOST}:8080/g\" /etc/nginx/nginx.conf && nginx -g 'daemon off;'" ]
+          ports:
+            - containerPort: {{ .Values.images.frontend.main.port }} # 80
+          env:
+            - name: NGINX_HOST
+              value: "backend-{{ .Release.Name }}"
+            - name: NGINX_PORT
+              value: {{ .Values.images.frontend.main.port | quote }}
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-{{ .Release.Name }}
+spec:
+  # type: LoadBalancer
+  type: NodePort
+  ports:
+    - port: 80 # {{ .Values.images.frontend.main.port }} # 80  # Does this break on 8080?
+  selector:
+    app: frontend-{{ .Release.Name }}

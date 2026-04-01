@@ -1,0 +1,46 @@
+
+  # # OOS Data Studio stuff (Wont work right now until refactor re: how connect manifest get envvars)
+  # # Connect-proxy
+  # PLATFORM_URL: {{ .Values.config.TOWER_SERVER_URL | quote }}
+  # CONNECT_HTTP_PORT: {{ .Values.config.CONNECT_HTTP_PORT | quote }}
+  # CONNECT_REDIS_ADDRESS: {{ .Values.config.TOWER_REDIS_URL | trimPrefix "redis://" | quote }}
+  # CONNECT_REDIS_PREFIX: "connect:session"
+  # CONNECT_REDIS_TLS_ENABLE: {{ .Values.config.CONNECT_REDIS_TLS_ENABLE | quote }}
+  # CONNECT_REDIS_DB: {{ .Values.config.CONNECT_REDIS_DB | quote }}
+  # CONNECT_PROXY_URL: {{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL | quote }}
+  # CONNECT_TUNNEL_URL: {{ .Values.config.CONNECT_TUNNEL_URL | quote }}
+  # CONNECT_OIDC_CLIENT_REGISTRATION_TOKEN: {{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN | quote }}
+  # LOCAL_CACHE_TTL: "2m"
+  # CONNECT_SSH_ENABLED: "true"
+  # CONNECT_SSH_ADDR: ":2222"
+
+  # # connect-server
+  # CONNECT_HOST_DOMAIN: "connect-server"
+  # CONNECT_TUNNEL_PORT: "7070"
+  # CONNECT_LISTENER_PORT: "7777"
+  # CONNECT_REDIS_ADDRESS: {{ .Values.config.TOWER_REDIS_URL | trimPrefix "redis://" | quote }}
+  # CONNECT_REDIS_PREFIX: "connect:session"
+  # CONNECT_REDIS_TLS_ENABLE: {{ .Values.config.CONNECT_REDIS_TLS_ENABLE | quote }}
+  # CONNECT_REDIS_DB: {{ .Values.config.CONNECT_REDIS_DB | quote }}
+  # CONNECT_SERVER_LOG_LEVEL: {{ .Values.config.CONNECT_SERVER_LOG_LEVEL }}
+
+  # ---
+# kind: ConfigMap
+# apiVersion: v1
+# metadata:
+#   name: {{ .Release.Name }}-data-studios-env
+#   labels:
+#     app: {{ .Release.Name }}-backend-cfg
+# data:
+#   data-studios.env: |
+#     PLATFORM_URL={{ .Values.config.TOWER_SERVER_URL }}
+
+#     CONNECT_HTTP_PORT={{ .Values.config.CONNECT_HTTP_PORT }}
+#     CONNECT_TUNNEL_URL={{ .Values.config.CONNECT_TUNNEL_URL }}
+#     CONNECT_PROXY_URL={{ .Values.config.TOWER_DATA_STUDIO_CONNECT_URL }}
+
+#     CONNECT_REDIS_ADDRESS={{ .Values.redis.TOWER_REDIS_URL }}
+#     CONNECT_REDIS_DB={{ .Values.redis.CONNECT_REDIS_DB }}
+#     CONNECT_OIDC_CLIENT_REGISTRATION_TOKEN={{ .Values.config.TOWER_OIDC_REGISTRATION_INITIAL_ACCESS_TOKEN }}
+
+#     CONNECT_SERVER_LOG_LEVEL=debug

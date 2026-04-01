@@ -1,7 +1,7 @@
 apiVersion: v2
 name: nextflow-tower-25-3-4
-description: Helm Chart to install Nextflow Tower
-version: "0.01"
+description: Helm Chart to install Seqera Platform
+version: "0.02"
 type: application
 appVersion: "25.3.4"
 maintainers:
